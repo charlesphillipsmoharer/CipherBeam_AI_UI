@@ -1,3 +1,5 @@
+//WoW//
+
 let audioCtx = null;
 let soundEnabled = true;
 
