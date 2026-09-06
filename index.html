@@ -1,0 +1,540 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CIPHERBEAM AI - Secure Optical Communication</title>
+  <link rel="stylesheet" href="styles.css" />
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+  <!-- Ambient cyber background & scanlines -->
+  <div class="cyber-background"></div>
+  <div class="scanlines"></div>
+
+  <!-- =======================================================
+       1. ANIMATED LOGIN / SIGNUP PORTAL
+       ======================================================= -->
+  <div class="auth-wrapper" id="authPortal">
+    <div class="auth-card">
+      <div class="hud-corner-tl"></div>
+      <div class="hud-corner-tr"></div>
+      <div class="hud-corner-bl"></div>
+      <div class="hud-corner-br"></div>
+
+      <div class="auth-header">
+        <div class="auth-badge">
+          <span class="pulse-dot"></span>
+          <span>Security Clearance Level 5</span>
+        </div>
+        <h1 class="auth-title">
+          <span class="brand-title-accent">CIPHERBEAM</span> AI
+        </h1>
+        <p class="auth-subtitle">SECURE OPTICAL COMMUNICATION SYSTEM</p>
+      </div>
+
+      <!-- Biometric Scanner -->
+      <div class="biometric-container" id="biometricBtn" title="Click to simulate Biometric Authentication">
+        <div class="biometric-scanner" id="biometricScannerRing">
+          <div class="scanner-laser"></div>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 0-10 10c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
+          </svg>
+        </div>
+        <span class="scanner-label" id="scannerStatusText">Tap to Scan Biometrics</span>
+      </div>
+
+      <!-- Login / Signup Selector -->
+      <div class="auth-tabs">
+        <button class="auth-tab-btn active" id="tabLogin" onclick="switchAuthMode('login')">TERMINAL LOGIN</button>
+        <button class="auth-tab-btn" id="tabSignup" onclick="switchAuthMode('signup')">REQUEST CLEARANCE</button>
+      </div>
+
+      <!-- Auth Form -->
+      <form id="authForm" onsubmit="handleAuthSubmit(event)">
+        <div class="form-group">
+          <label class="form-label" id="userIdLabel">Operator Call-Sign / ID</label>
+          <div class="form-input-wrap">
+            <input type="text" class="form-input" id="authIdentifier" placeholder="CYBER-BEAM-01" value="OPERATOR-DELTA" required />
+            <i data-lucide="user"></i>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label">Quantum Key / Access Passphrase</label>
+          <div class="form-input-wrap">
+            <input type="password" class="form-input" id="authPassword" placeholder="••••••••••••" value="cipherbeam2026" required />
+            <i data-lucide="shield-check"></i>
+          </div>
+        </div>
+
+        <div class="form-group" id="signupFields" style="display: none;">
+          <label class="form-label">Optical Station Node</label>
+          <div class="form-input-wrap">
+            <input type="text" class="form-input" id="authStation" placeholder="ESP32-STATION-ALPHA" value="ESP32-OPTICAL-01" />
+            <i data-lucide="radio"></i>
+          </div>
+        </div>
+
+        <button type="submit" class="btn-primary-auth" id="authSubmitBtn">
+          <i data-lucide="key"></i>
+          <span id="authBtnText">INITIALIZE SECURE SESSION</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       2. MAIN CIPHERBEAM UI APPLICATION (Matches Reference Image)
+       ======================================================= -->
+  <div class="app-container">
+    <div class="terminal-hud-frame">
+      <!-- Sci-fi Corner Brackets -->
+      <div class="hud-corner-tl"></div>
+      <div class="hud-corner-tr"></div>
+      <div class="hud-corner-bl"></div>
+      <div class="hud-corner-br"></div>
+      <div class="hud-border-left"></div>
+      <div class="hud-border-right"></div>
+
+      <!-- Top Header Bar -->
+      <header class="header-bar">
+        <div class="header-brand">
+          <div class="brand-title">
+            <span class="brand-title-accent">CIPHERBEAM</span> AI
+          </div>
+          <div class="brand-subtitle">SECURE OPTICAL COMMUNICATION</div>
+        </div>
+
+        <div class="header-status-area">
+          <div class="system-status-indicator">
+            <span class="pulse-dot"></span>
+            <span>SYSTEM ONLINE</span>
+          </div>
+
+          <div class="header-controls">
+            <a href="CipherBeam_AI_UI.zip" download="CipherBeam_AI_UI.zip" class="icon-btn-subtle" style="text-decoration: none; border-color: rgba(16, 185, 129, 0.4); color: var(--primary);" title="Download Complete Project ZIP">
+              <i data-lucide="download"></i>
+              <span>DOWNLOAD ZIP</span>
+            </a>
+            <button class="icon-btn-subtle" id="audioToggleBtn" title="Toggle cyber sound synthesizer" onclick="toggleAudioFx()">
+              <i data-lucide="volume-2" id="audioIcon"></i>
+              <span id="audioLabel">AUDIO ON</span>
+            </button>
+            <button class="icon-btn-subtle" title="Lock System & Return to Authentication" onclick="lockTerminal()">
+              <i data-lucide="lock"></i>
+              <span>LOCK</span>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      <!-- Main Workspace (2 Columns) -->
+      <div class="workspace-grid">
+        <!-- Left Column: DASHBOARD Navigation -->
+        <aside class="sidebar-panel">
+          <div>
+            <div class="sidebar-title">DASHBOARD</div>
+            <ul class="nav-menu">
+              <li>
+                <button class="nav-item-btn active" onclick="switchNavTab('compose', this)">
+                  <span class="nav-icon">✉</span>
+                  <span>Compose</span>
+                </button>
+              </li>
+              <li>
+                <button class="nav-item-btn" onclick="switchNavTab('transmit', this)">
+                  <span class="nav-icon">📡</span>
+                  <span>Transmit</span>
+                </button>
+              </li>
+              <li>
+                <button class="nav-item-btn" onclick="switchNavTab('security', this)">
+                  <span class="nav-icon">🔐</span>
+                  <span>Security</span>
+                </button>
+              </li>
+              <li>
+                <button class="nav-item-btn" onclick="switchNavTab('analytics', this)">
+                  <span class="nav-icon">📊</span>
+                  <span>Analytics</span>
+                </button>
+              </li>
+              <li>
+                <button class="nav-item-btn" onclick="switchNavTab('settings', this)">
+                  <span class="nav-icon">⚙</span>
+                  <span>Settings</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
+          <!-- Live Hardware Sidebar Telemetry Widget -->
+          <div class="sidebar-telemetry-widget">
+            <div class="telemetry-row">
+              <span class="telemetry-label">ESP32 LINK:</span>
+              <span class="telemetry-val" id="sbEspStatus">STABLE (921.6k)</span>
+            </div>
+            <div class="telemetry-row">
+              <span class="telemetry-label">OPTICAL BEAM:</span>
+              <span class="telemetry-val" id="sbLaserStatus">850nm / 15mW</span>
+            </div>
+            <div class="telemetry-row">
+              <span class="telemetry-label">ENTROPY:</span>
+              <span class="telemetry-val" id="sbEntropy">99.8% QUANTUM</span>
+            </div>
+          </div>
+        </aside>
+
+        <!-- Right Column: TRANSMISSION CONTROL & Content Views -->
+        <main class="main-content-panel">
+          
+          <!-- ================= TAB 1: COMPOSE / TRANSMISSION CONTROL (REFERENCE LAYOUT) ================= -->
+          <div class="tab-view active" id="tabView-compose">
+            <div class="section-header-title">
+              <span>TRANSMISSION CONTROL</span>
+            </div>
+
+            <!-- Message Input Area -->
+            <div class="control-row">
+              <label class="control-label" for="messageInput">Message</label>
+              <div class="bracket-message-card">
+                <span class="bracket-marker-tl">[</span>
+                <textarea 
+                  id="messageInput" 
+                  class="message-textarea" 
+                  placeholder="Type your message here..."
+                  oninput="updateMessageTelemetry()"
+                >SECURE PAYLOAD // CIPHERBEAM OPTICAL LINK: Node 0x4B handshake confirmed. AES-256 session key exchanged via Quantum Photonic Channel.</textarea>
+                <span class="bracket-marker-br">]</span>
+
+                <div class="textarea-footer-telemetry">
+                  <span>CHARACTERS: <strong id="charCount" class="text-primary">119</strong></span>
+                  <span>EST. OPTICAL PACKETS: <strong id="packetCount" class="text-primary">2</strong></span>
+                  <span>BIT RATE: <strong class="text-primary">921.6 kbps</strong></span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Encryption Dropdown Selector -->
+            <div class="control-row">
+              <label class="control-label" for="encryptionSelector">Encryption</label>
+              <div class="custom-select-wrap">
+                <select id="encryptionSelector" class="bracket-select" onchange="onEncryptionChange()">
+                  <option value="AES-256-GCM">[ AES-256-GCM ▼ ]</option>
+                  <option value="CHACHA20-POLY1305">[ CHACHA20-POLY1305 ▼ ]</option>
+                  <option value="KYBER-1024">[ KYBER-1024 POST-QUANTUM ▼ ]</option>
+                  <option value="OPTICAL-OTP">[ OPTICAL ONE-TIME PAD (QKD) ▼ ]</option>
+                </select>
+                <span class="select-arrow">▼</span>
+              </div>
+            </div>
+
+            <!-- Action Buttons: [ 🔐 ENCRYPT ]  [ ⚡ TRANSMIT ] -->
+            <div class="action-buttons-group">
+              <!-- Unique Animated Encrypt Button -->
+              <button class="btn-cyber-encrypt" id="btnEncrypt" onclick="handleEncryptAction(event)">
+                <span class="btn-icon" id="encryptIcon">🔐</span>
+                <span id="encryptText">ENCRYPT</span>
+              </button>
+
+              <!-- Unique Animated Transmit Button -->
+              <button class="btn-cyber-transmit" id="btnTransmit" onclick="handleTransmitAction(event)">
+                <span class="btn-icon">⚡</span>
+                <span>TRANSMIT</span>
+              </button>
+            </div>
+
+            <!-- Encrypted Stream / Hex Payload Preview (Revealed on Encrypt) -->
+            <div class="encrypted-result-panel" id="encryptedResultPanel">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span class="control-label" style="color: var(--cyan);">ENCRYPTED CIPHERTEXT & AUTH TAG</span>
+                <span class="badge-tag badge-emerald" id="activeCipherTag">AES-256-GCM AUTHENTICATED</span>
+              </div>
+              <div class="hex-stream-viewer" id="hexStreamViewer">
+                0x7f4e91bc 0xaa28c031 0x5109b8d2 0x93ef1802 0x8b32cf09 0x6e8812c4 0x110298ea 0x3344cc90 0x8901fab2 0x4422dd88 [IV: e9f821c90a1] [TAG: 9c0182af34]
+              </div>
+              <div style="font-size: 0.72rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+                <div style="display: flex; gap: 1rem;">
+                  <span>SHA-256 Digest: <span id="shaDigest">8f4c...91b2</span></span>
+                  <span>Photon Entropy: <span style="color: var(--primary);">99.94%</span></span>
+                </div>
+                <button class="icon-btn-subtle" style="font-size: 0.72rem; padding: 0.3rem 0.6rem;" onclick="downloadEncryptedPayload()">
+                  <i data-lucide="file-down"></i>
+                  <span>DOWNLOAD PAYLOAD (.JSON)</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB 2: TRANSMIT (LIVE OPTICAL CHANNEL) ================= -->
+          <div class="tab-view" id="tabView-transmit">
+            <div class="section-header-title">
+              <span>OPTICAL BEAM CHANNEL TELEMETRY</span>
+            </div>
+
+            <div class="dashboard-grid-2">
+              <div class="hud-stat-box">
+                <span class="hud-stat-title">OPTICAL LASER WAVELENGTH</span>
+                <div class="hud-stat-number" style="color: var(--primary);">850.4 nm</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Laser Diode Output Power: 14.8 mW</span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-title">PHOTON ARRIVAL RATE</span>
+                <div class="hud-stat-number" style="color: var(--cyan);">1.84 × 10¹⁴ /s</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Detector Sensitivity: -38.2 dBm</span>
+              </div>
+            </div>
+
+            <div class="hud-stat-box">
+              <span class="hud-stat-title">LIVE OPTICAL SIGNAL WAVEFORM</span>
+              <div class="beam-canvas-container" style="height: 120px; margin: 0.5rem 0;">
+                <canvas id="liveWaveformCanvas"></canvas>
+              </div>
+              <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim);">
+                <span>Channel Jitter: &lt; 0.4 ps</span>
+                <span>Modulation: Direct OOK / Manchester AI</span>
+                <span>ESP32 Transceiver Status: ONLINE</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB 3: SECURITY (QUANTUM KEYS & PROTOCOLS) ================= -->
+          <div class="tab-view" id="tabView-security">
+            <div class="section-header-title">
+              <span>CRYPTOGRAPHIC PROTOCOLS & KEY VAULT</span>
+            </div>
+
+            <div class="hud-table-wrapper">
+              <table class="hud-table">
+                <thead>
+                  <tr>
+                    <th>Protocol</th>
+                    <th>Key Length</th>
+                    <th>Hardware Acceleration</th>
+                    <th>Post-Quantum Status</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>AES-256-GCM</td>
+                    <td>256-bit</td>
+                    <td>ESP32 Cryptographic Engine</td>
+                    <td>Standard Resistant</td>
+                    <td><span class="badge-tag badge-emerald">ACTIVE</span></td>
+                  </tr>
+                  <tr>
+                    <td>Kyber-1024</td>
+                    <td>3168-bit</td>
+                    <td>AI Co-Processor Core 1</td>
+                    <td>NIST PQC Level 5</td>
+                    <td><span class="badge-tag badge-cyan">STANDBY</span></td>
+                  </tr>
+                  <tr>
+                    <td>ChaCha20-Poly1305</td>
+                    <td>256-bit</td>
+                    <td>Software Vectorized</td>
+                    <td>High-Speed Stream</td>
+                    <td><span class="badge-tag badge-emerald">READY</span></td>
+                  </tr>
+                  <tr>
+                    <td>Optical QKD (One-Time Pad)</td>
+                    <td>Infinite Entropy</td>
+                    <td>Photodiode Noise Harvester</td>
+                    <td>Information-Theoretic Secure</td>
+                    <td><span class="badge-tag badge-amber">ONLINE</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="hud-stat-box">
+              <span class="hud-stat-title">QUANTUM ENTROPY HARVESTER</span>
+              <div style="font-size: 0.85rem; color: var(--text-main); margin-top: 0.25rem;">
+                Entropy Source: ESP32 Optical Thermal Noise & Photonic Fluctuation. Live Seed: <code style="color: var(--primary);">0x9A44F128E73B901C</code>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB 4: ANALYTICS ================= -->
+          <div class="tab-view" id="tabView-analytics">
+            <div class="section-header-title">
+              <span>SYSTEM ANALYTICS & BIT ERROR RATE (BER)</span>
+            </div>
+
+            <div class="dashboard-grid-2">
+              <div class="hud-stat-box">
+                <span class="hud-stat-title">SIGNAL-TO-NOISE RATIO (SNR)</span>
+                <div class="hud-stat-number" style="color: var(--primary);">34.2 dB</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">Optical Clear Line of Sight</span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-title">BIT ERROR RATE (BER)</span>
+                <div class="hud-stat-number" style="color: var(--cyan);">&lt; 10⁻⁹</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">AI Forward Error Correction: Active</span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-title">TOTAL TRANSMITTED PACKETS</span>
+                <div class="hud-stat-number" id="analyticsPacketTotal">1,482</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">0 Packet Drops Detected</span>
+              </div>
+              <div class="hud-stat-box">
+                <span class="hud-stat-title">SYSTEM TEMPERATURE</span>
+                <div class="hud-stat-number" id="analyticsTemp" style="color: var(--amber);">23.1°C</div>
+                <span style="font-size: 0.75rem; color: var(--text-muted);">ESP32 Ambient Thermal Stable</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB 5: SETTINGS ================= -->
+          <div class="tab-view" id="tabView-settings">
+            <div class="section-header-title">
+              <span>SYSTEM & HARDWARE SETTINGS</span>
+            </div>
+
+            <div class="hud-stat-box">
+              <div class="toggle-switch-wrap">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">ESP32 Hardware Baud Rate</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Set serial baud rate for optical transceiver</div>
+                </div>
+                <select class="bracket-select" style="width: 140px; padding: 0.4rem 0.8rem; font-size: 0.8rem;">
+                  <option>921600 baud</option>
+                  <option>115200 baud</option>
+                  <option>460800 baud</option>
+                </select>
+              </div>
+
+              <div class="toggle-switch-wrap">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">AI Forward Error Correction</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Deep neural pulse shape reconstruction</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-switch-wrap">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Quantum Noise Randomizer</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Inject true hardware entropy into key seeds</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" checked />
+                  <span class="slider"></span>
+                </label>
+              </div>
+
+              <div class="toggle-switch-wrap">
+                <div>
+                  <div style="font-weight: 600; font-size: 0.9rem;">Audio Synthesis Sound FX</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Soothing sci-fi tactile feedback soundscape</div>
+                </div>
+                <label class="switch">
+                  <input type="checkbox" id="settingsAudioToggle" checked onchange="toggleAudioFx()" />
+                  <span class="slider"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+        </main>
+      </div>
+
+      <!-- Footer Status Telemetry Bar (Matches Reference Image) -->
+      <footer class="footer-status-bar">
+        <div class="footer-metrics-list">
+          <div class="footer-metric-node">
+            <span>ESP32</span>
+            <span class="status-dot-green">●</span>
+            <span>Connected</span>
+          </div>
+
+          <span class="footer-metric-divider">|</span>
+
+          <div class="footer-metric-node">
+            <span>Optical</span>
+            <span class="status-dot-green">●</span>
+            <span>Ready</span>
+          </div>
+
+          <span class="footer-metric-divider">|</span>
+
+          <div class="footer-metric-node">
+            <span>AI</span>
+            <span class="status-dot-green">●</span>
+            <span>Active</span>
+          </div>
+
+          <span class="footer-metric-divider">|</span>
+
+          <div class="footer-metric-node">
+            <span class="temp-tag" id="footerTemp">23°C</span>
+          </div>
+        </div>
+
+        <div style="font-size: 0.75rem; color: var(--text-dim); display: flex; align-items: center; gap: 0.5rem;">
+          <span>LINK QUALITY: <strong style="color: var(--primary);">99.98%</strong></span>
+          <span>•</span>
+          <span>LATENCY: <strong style="color: var(--cyan);">1.2ms</strong></span>
+        </div>
+      </footer>
+    </div>
+  </div>
+
+  <!-- =======================================================
+       3. INTERACTIVE OPTICAL BEAM TRANSMISSION SIMULATOR MODAL
+       ======================================================= -->
+  <div class="optical-transmission-modal" id="opticalModal">
+    <div class="transmission-card">
+      <div class="hud-corner-tl"></div>
+      <div class="hud-corner-tr"></div>
+      <div class="hud-corner-bl"></div>
+      <div class="hud-corner-br"></div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="brand-title" style="font-size: 1.1rem;">
+          <span class="brand-title-accent">OPTICAL BEAM</span> TRANSMISSION IN PROGRESS
+        </div>
+        <span class="badge-tag badge-cyan" id="transmissionCipherBadge">AES-256-GCM</span>
+      </div>
+
+      <div class="beam-canvas-container">
+        <canvas id="opticalBeamCanvas"></canvas>
+      </div>
+
+      <div class="progress-bar-wrap">
+        <div class="progress-bar-fill" id="transmissionProgressBar"></div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+        <span id="transmissionProgressLabel">Modulating 850nm Photons...</span>
+        <span id="transmissionProgressPct">0%</span>
+      </div>
+
+      <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
+        <button class="btn-cyber-encrypt" id="closeModalBtn" style="display: none; padding: 0.5rem 1.2rem; font-size: 0.8rem;" onclick="closeTransmissionModal()">
+          CONFIRM & CLOSE
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Alert -->
+  <div class="cyber-toast" id="cyberToast">
+    <i data-lucide="check-circle" style="stroke: var(--primary); width: 20px; height: 20px;"></i>
+    <span id="toastMessage">Payload Encrypted Successfully</span>
+  </div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+  <script>
+    // Initialize Lucide Icons
+    lucide.createIcons();
+  </script>
+</body>
+</html>
