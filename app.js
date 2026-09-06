@@ -430,6 +430,8 @@ function switchNavTab(tabName, clickedBtn) {
 
   if (tabName === 'transmit') {
     startWaveformAnimation();
+  } else if (tabName === 'hidden') {
+    setTimeout(initCarrierSpectrumCanvas, 50);
   }
 }
 
@@ -756,11 +758,338 @@ function startLiveHardwareSimulation() {
   }, 3000);
 }
 
+// ========================================================
+// 9. ANIMATED MATRIX DIGITAL RAIN SCREEN BACKGROUND
+// ========================================================
+let matrixEnabled = true;
+let matrixCanvas = null;
+let matrixCtx = null;
+let matrixColumns = [];
+let matrixRafId = null;
+const matrixChars = 'ｦｱｳｴｵｶｷｹｺｻｼｽｾｿﾀﾂﾃﾅﾆﾇﾈﾊﾋﾎﾏﾐﾑﾒﾓﾔﾕﾗﾘﾜ0123456789ABCDEFλΩΨΦΔΣπ01010101';
+
+function initMatrixRain() {
+  matrixCanvas = document.getElementById('matrixCanvas');
+  if (!matrixCanvas) return;
+  matrixCtx = matrixCanvas.getContext('2d');
+
+  function resizeMatrix() {
+    matrixCanvas.width = window.innerWidth;
+    matrixCanvas.height = window.innerHeight;
+    const fontSize = 14;
+    const cols = Math.floor(matrixCanvas.width / fontSize);
+    matrixColumns = [];
+    for (let i = 0; i < cols; i++) {
+      matrixColumns[i] = Math.floor(Math.random() * -100);
+    }
+  }
+
+  window.addEventListener('resize', resizeMatrix);
+  resizeMatrix();
+
+  const fontSize = 14;
+  let lastTime = 0;
+  const fpsInterval = 1000 / 35; // 35 FPS for authentic terminal matrix rain
+
+  function renderMatrix(timestamp) {
+    if (!matrixEnabled) {
+      matrixRafId = requestAnimationFrame(renderMatrix);
+      return;
+    }
+
+    const elapsed = timestamp - lastTime;
+    if (elapsed > fpsInterval) {
+      lastTime = timestamp - (elapsed % fpsInterval);
+
+      // Translucent fill to create the glowing falling trail
+      matrixCtx.fillStyle = 'rgba(7, 11, 20, 0.08)';
+      matrixCtx.fillRect(0, 0, matrixCanvas.width, matrixCanvas.height);
+
+      matrixCtx.font = `${fontSize}px 'JetBrains Mono', monospace`;
+
+      for (let i = 0; i < matrixColumns.length; i++) {
+        const char = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        const x = i * fontSize;
+        const y = matrixColumns[i] * fontSize;
+
+        // Bright white glowing leader character
+        matrixCtx.fillStyle = '#ffffff';
+        matrixCtx.shadowColor = '#10b981';
+        matrixCtx.shadowBlur = 8;
+        matrixCtx.fillText(char, x, y);
+
+        // Reset shadow for following characters
+        matrixCtx.shadowBlur = 0;
+
+        // Decaying characters: emerald green with cyan accents
+        const isCyan = Math.random() > 0.85;
+        matrixCtx.fillStyle = isCyan ? '#06b6d4' : '#10b981';
+        const prevChar = matrixChars[Math.floor(Math.random() * matrixChars.length)];
+        matrixCtx.fillText(prevChar, x, y - fontSize);
+
+        // Reset to top with randomized delay when past bottom
+        if (y > matrixCanvas.height && Math.random() > 0.975) {
+          matrixColumns[i] = 0;
+        } else {
+          matrixColumns[i]++;
+        }
+      }
+    }
+
+    matrixRafId = requestAnimationFrame(renderMatrix);
+  }
+
+  if (matrixRafId) cancelAnimationFrame(matrixRafId);
+  matrixRafId = requestAnimationFrame(renderMatrix);
+}
+
+function toggleMatrixRain() {
+  matrixEnabled = !matrixEnabled;
+  playCyberTone('click');
+  const btn = document.getElementById('matrixToggleBtn');
+  const label = document.getElementById('matrixLabel');
+  const canvas = document.getElementById('matrixCanvas');
+
+  if (matrixEnabled) {
+    if (label) label.textContent = 'MATRIX ON';
+    if (canvas) canvas.classList.remove('paused');
+    if (btn) btn.classList.remove('active');
+    showToast('Matrix Digital Rain: ENABLED');
+  } else {
+    if (label) label.textContent = 'MATRIX OFF';
+    if (canvas) {
+      canvas.classList.add('paused');
+      if (matrixCtx) matrixCtx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+    if (btn) btn.classList.add('active');
+    showToast('Matrix Digital Rain: MUTED');
+  }
+}
+
+// ========================================================
+// 10. COLLAPSIBLE DASHBOARD NAVIGATION & HIDDEN DASHBOARD BUTTON
+// ========================================================
+let isSidebarCollapsed = false;
+
+function toggleDashboardSidebar() {
+  playCyberTone('click');
+  isSidebarCollapsed = !isSidebarCollapsed;
+
+  const workspaceGrid = document.getElementById('workspaceGrid');
+  const sidebarPanel = document.getElementById('sidebarPanel');
+  const floatingBtn = document.getElementById('floatingDashboardBtn');
+  const toggleBtn = document.getElementById('toggleDashboardBtn');
+  const toggleLabel = document.getElementById('sidebarToggleLabel');
+  const toggleIcon = document.getElementById('sidebarToggleIcon');
+
+  if (isSidebarCollapsed) {
+    if (workspaceGrid) workspaceGrid.classList.add('sidebar-collapsed');
+    if (sidebarPanel) sidebarPanel.classList.add('collapsed');
+    if (floatingBtn) floatingBtn.classList.add('visible');
+    if (toggleBtn) toggleBtn.classList.add('collapsed');
+    if (toggleLabel) toggleLabel.textContent = 'SHOW DASHBOARD';
+    if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+    showToast('Dashboard Navigation: HIDDEN // Workspace Expanded');
+  } else {
+    if (workspaceGrid) workspaceGrid.classList.remove('sidebar-collapsed');
+    if (sidebarPanel) sidebarPanel.classList.remove('collapsed');
+    if (floatingBtn) floatingBtn.classList.remove('visible');
+    if (toggleBtn) toggleBtn.classList.remove('collapsed');
+    if (toggleLabel) toggleLabel.textContent = 'HIDE DASHBOARD';
+    if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-close');
+    showToast('Dashboard Navigation: RESTORED');
+  }
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+}
+
+// ========================================================
+// 11. CLASSIFIED HIDDEN MATRIX DASHBOARD CONTROLLERS
+// ========================================================
+let spectrumRafId = null;
+
+function initCarrierSpectrumCanvas() {
+  const canvas = document.getElementById('carrierSpectrumCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  canvas.width = canvas.parentElement.clientWidth;
+  canvas.height = 130;
+
+  let offset = 0;
+
+  function renderSpectrum() {
+    ctx.fillStyle = 'rgba(2, 5, 10, 0.25)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    const midY = canvas.height / 2;
+
+    // Center baseline
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(0, midY);
+    ctx.lineTo(canvas.width, midY);
+    ctx.stroke();
+
+    // Secondary sideband waves
+    ctx.strokeStyle = 'rgba(139, 92, 246, 0.4)';
+    ctx.lineWidth = 1.2;
+    ctx.beginPath();
+    for (let x = 0; x < canvas.width; x++) {
+      const y = midY + Math.sin((x + offset * 1.5) * 0.04) * 15 * Math.sin(x * 0.015);
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+
+    // Primary optical carrier wave (DWDM 1550nm)
+    ctx.strokeStyle = '#06b6d4';
+    ctx.lineWidth = 2;
+    ctx.shadowColor = 'rgba(6, 182, 212, 0.8)';
+    ctx.shadowBlur = 8;
+    ctx.beginPath();
+    for (let x = 0; x < canvas.width; x++) {
+      const centerDist = Math.abs(x - canvas.width / 2) / (canvas.width / 2);
+      const envelope = Math.exp(-centerDist * centerDist * 6);
+      const carrier = Math.sin((x - offset * 3) * 0.08) * (28 * envelope + 4);
+      const noise = (Math.random() - 0.5) * 3;
+      const y = midY - carrier + noise;
+      if (x === 0) ctx.moveTo(x, y);
+      else ctx.lineTo(x, y);
+    }
+    ctx.stroke();
+    ctx.shadowBlur = 0;
+
+    offset += 1.2;
+    spectrumRafId = requestAnimationFrame(renderSpectrum);
+  }
+
+  if (spectrumRafId) cancelAnimationFrame(spectrumRafId);
+  spectrumRafId = requestAnimationFrame(renderSpectrum);
+}
+
+function handleMatrixCommand(e) {
+  e.preventDefault();
+  const input = document.getElementById('matrixCommandInput');
+  if (!input) return;
+  const cmd = input.value.trim().toLowerCase();
+  input.value = '';
+  if (!cmd) return;
+
+  playCyberTone('click');
+  appendMatrixLog(`matrix@cipherbeam:~$ ${cmd}`, 'term-cyan');
+
+  setTimeout(() => {
+    executeMatrixCommand(cmd);
+  }, 120);
+}
+
+function executeMatrixCommand(cmd) {
+  switch (cmd) {
+    case 'help':
+      appendMatrixLog('Available Classified Matrix Commands:', 'term-system');
+      appendMatrixLog('  • status    - Display quantum cryptographic link state', 'term-line');
+      appendMatrixLog('  • decrypt   - Force quantum decryption cycle on live packets', 'term-line');
+      appendMatrixLog('  • scan      - Run laser optical spectrum sweep', 'term-line');
+      appendMatrixLog('  • stealth   - Toggle quantum non-demolition monitor tap', 'term-line');
+      appendMatrixLog('  • pulse     - Inject high-power optical photonic sync pulse', 'term-line');
+      appendMatrixLog('  • clear     - Clear terminal log screen', 'term-line');
+      break;
+
+    case 'status':
+      appendMatrixLog('[STATUS] Optical Link: 1550.12nm DWDM // FSO Station Locked', 'term-success');
+      appendMatrixLog('[STATUS] QBER: 0.038% // Bell State Fidelity: 99.98%', 'term-success');
+      appendMatrixLog('[STATUS] Matrix Stream: 60 FPS Digital Code Rain Active', 'term-cyan');
+      playCyberTone('auth-success');
+      break;
+
+    case 'decrypt':
+      appendMatrixLog('[DECRYPTING] Modulating photon polarization matrix...', 'term-amber');
+      playCyberTone('encrypt');
+      setTimeout(() => {
+        appendMatrixLog('[SUCCESS] Payload deciphered: 0x7F4E91BC :: "CONFIDENTIAL_OPERATOR_ACCESS_GRANTED"', 'term-success');
+        playCyberTone('auth-success');
+      }, 500);
+      break;
+
+    case 'scan':
+      appendMatrixLog('[SCAN] Optical spectrum sweep initiated across 800nm - 1650nm...', 'term-cyan');
+      initCarrierSpectrumCanvas();
+      playCyberTone('transmit');
+      setTimeout(() => {
+        appendMatrixLog('[SCAN] Primary carrier detected at 1550.12nm (Peak SNR: 45.1 dB)', 'term-success');
+      }, 600);
+      break;
+
+    case 'stealth':
+      appendMatrixLog('[STEALTH] Quantum non-demolition filter reconfigured. Tap undetectable.', 'term-amber');
+      playCyberTone('click');
+      break;
+
+    case 'pulse':
+      triggerMatrixPulse();
+      break;
+
+    case 'clear':
+      clearMatrixTerminal();
+      break;
+
+    default:
+      appendMatrixLog(`[ERROR] Command not recognized: '${cmd}'. Type 'help' for command list.`, 'term-red');
+      break;
+  }
+}
+
+function appendMatrixLog(text, className = '') {
+  const log = document.getElementById('matrixTerminalLog');
+  if (!log) return;
+  const line = document.createElement('div');
+  line.className = `term-line ${className}`;
+  line.textContent = text;
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
+}
+
+function triggerMatrixPulse() {
+  playCyberTone('transmit');
+  appendMatrixLog('[PULSE] High-intensity 850nm/1550nm dual-frequency pulse emitted!', 'term-cyan');
+  showToast('Optical Photonic Sync Pulse Injected');
+  const canvas = document.getElementById('matrixCanvas');
+  if (canvas) {
+    canvas.style.opacity = '1';
+    setTimeout(() => {
+      canvas.style.opacity = '0.72';
+    }, 400);
+  }
+}
+
+function reseedQuantumEntropy() {
+  playCyberTone('encrypt');
+  const randHex = '0x' + Array.from({ length: 16 }, () => Math.floor(Math.random() * 16).toString(16)).join('').toUpperCase();
+  appendMatrixLog(`[RE-SEED] Generated new 256-bit SPDC quantum seed: ${randHex}`, 'term-success');
+  showToast('QKD Entropy Stream Re-Seeded');
+}
+
+function clearMatrixTerminal() {
+  const log = document.getElementById('matrixTerminalLog');
+  if (log) {
+    log.innerHTML = `
+      <div class="term-line term-system">[SYSTEM] CipherBeam AI Deep Intelligence Core Initialized.</div>
+      <div class="term-line term-success">[CONSOLE CLEARED] Ready for operator commands.</div>
+    `;
+  }
+  playCyberTone('click');
+}
+
 // Initialize on DOM load
 window.addEventListener('DOMContentLoaded', () => {
   updateMessageTelemetry();
   startLiveHardwareSimulation();
   init3DParallax();
+  initMatrixRain();
   if (window.lucide) {
     lucide.createIcons();
   }

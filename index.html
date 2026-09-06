@@ -11,6 +11,8 @@
 </head>
 
 <body>
+  <!-- Animated Matrix Digital Rain Canvas -->
+  <canvas id="matrixCanvas" class="matrix-canvas"></canvas>
   <!-- Ambient cyber background & scanlines -->
   <div class="cyber-background"></div>
   <div class="scanlines"></div>
@@ -453,6 +455,18 @@ ESTIMATED QBER: 0.042% [THRESHOLD: &lt;5%]</pre>
           </div>
 
           <div class="header-controls">
+            <!-- Hidden Dashboard Toggle Button -->
+            <button class="icon-btn-subtle" id="toggleDashboardBtn" title="Toggle Dashboard Sidebar (Hide/Show)"
+              onclick="toggleDashboardSidebar()">
+              <i data-lucide="panel-left-close" id="sidebarToggleIcon"></i>
+              <span id="sidebarToggleLabel">HIDE DASHBOARD</span>
+            </button>
+            <!-- Animated Matrix Screen Toggle -->
+            <button class="icon-btn-subtle" id="matrixToggleBtn" title="Toggle Animated Matrix Background Rain"
+              onclick="toggleMatrixRain()">
+              <i data-lucide="binary" id="matrixIcon"></i>
+              <span id="matrixLabel">MATRIX ON</span>
+            </button>
             <a href="CipherBeam_AI_UI.zip" download="CipherBeam_AI_UI.zip" class="icon-btn-subtle"
               style="text-decoration: none; border-color: rgba(16, 185, 129, 0.4); color: var(--primary);"
               title="Download Complete Project ZIP">
@@ -472,12 +486,26 @@ ESTIMATED QBER: 0.042% [THRESHOLD: &lt;5%]</pre>
         </div>
       </header>
 
+      <!-- Floating Unhide Dashboard Button (Shown when sidebar is hidden) -->
+      <button class="floating-dashboard-btn" id="floatingDashboardBtn" title="Reveal Hidden Dashboard Sidebar"
+        onclick="toggleDashboardSidebar()">
+        <i data-lucide="panel-left-open"></i>
+        <span>SHOW DASHBOARD</span>
+        <span class="floating-pulse-dot"></span>
+      </button>
+
       <!-- Main Workspace (2 Columns) -->
-      <div class="workspace-grid">
+      <div class="workspace-grid" id="workspaceGrid">
         <!-- Left Column: DASHBOARD Navigation -->
-        <aside class="sidebar-panel">
+        <aside class="sidebar-panel" id="sidebarPanel">
           <div>
-            <div class="sidebar-title">DASHBOARD</div>
+            <div class="sidebar-header-row">
+              <div class="sidebar-title">DASHBOARD</div>
+              <button type="button" class="sidebar-collapse-btn" title="Hide Dashboard Sidebar"
+                onclick="toggleDashboardSidebar()">
+                <i data-lucide="chevron-left"></i>
+              </button>
+            </div>
             <ul class="nav-menu">
               <li>
                 <button class="nav-item-btn active" onclick="switchNavTab('compose', this)">
@@ -507,6 +535,15 @@ ESTIMATED QBER: 0.042% [THRESHOLD: &lt;5%]</pre>
                 <button class="nav-item-btn" onclick="switchNavTab('settings', this)">
                   <span class="nav-icon">⚙</span>
                   <span>Settings</span>
+                </button>
+              </li>
+              <!-- Hidden Classified Matrix Dashboard Item -->
+              <li>
+                <button class="nav-item-btn classified-nav-btn" onclick="switchNavTab('hidden', this)"
+                  title="Access Classified Matrix Telemetry Dashboard">
+                  <span class="nav-icon">👁</span>
+                  <span>Hidden Dashboard</span>
+                  <span class="classified-pill">MATRIX</span>
                 </button>
               </li>
             </ul>
@@ -783,6 +820,134 @@ ESTIMATED QBER: 0.042% [THRESHOLD: &lt;5%]</pre>
                   <input type="checkbox" id="settingsAudioToggle" checked onchange="toggleAudioFx()" />
                   <span class="slider"></span>
                 </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- ================= TAB 6: CLASSIFIED HIDDEN MATRIX DASHBOARD ================= -->
+          <div class="tab-view" id="tabView-hidden">
+            <div class="section-header-title">
+              <div class="classified-header-wrap">
+                <span class="pulse-beacon-red"></span>
+                <span>CLASSIFIED // QUANTUM MATRIX INTELLIGENCE DASHBOARD</span>
+              </div>
+              <div class="classified-security-badge">
+                <i data-lucide="shield-alert"></i>
+                <span>CLEARANCE LEVEL: BLACK-VIPER // ENCRYPTED</span>
+              </div>
+            </div>
+
+            <!-- Quick Matrix Controls Row -->
+            <div class="matrix-action-toolbar">
+              <div class="toolbar-left">
+                <span class="terminal-status-text"><strong class="text-primary">● LIVE STREAM</strong>: INTERCEPTING
+                  OPTICAL BEAM QKD CHANNEL</span>
+              </div>
+              <div class="toolbar-actions">
+                <button type="button" class="icon-btn-subtle" onclick="triggerMatrixPulse()">
+                  <i data-lucide="zap"></i>
+                  <span>INJECT PULSE</span>
+                </button>
+                <button type="button" class="icon-btn-subtle" onclick="reseedQuantumEntropy()">
+                  <i data-lucide="refresh-cw"></i>
+                  <span>RE-SEED KEY</span>
+                </button>
+                <button type="button" class="icon-btn-subtle" onclick="clearMatrixTerminal()">
+                  <i data-lucide="terminal"></i>
+                  <span>CLEAR CONSOLE</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Matrix Intelligence 2-Column Grid -->
+            <div class="hidden-dashboard-grid">
+              <!-- Left: Real-time Interactive Matrix Terminal Console -->
+              <div class="matrix-panel-card">
+                <div class="matrix-card-header">
+                  <div class="card-title-wrap">
+                    <span class="matrix-led"></span>
+                    <span>QUANTUM DECRYPTION // LIVE MATRIX CONSOLE</span>
+                  </div>
+                  <span class="matrix-protocol-tag">PROTO: BB84-QKD</span>
+                </div>
+                <div class="matrix-terminal-window" id="matrixTerminalLog">
+                  <div class="term-line term-system">[SYSTEM] CipherBeam AI Deep Intelligence Core Initialized.</div>
+                  <div class="term-line term-system">[OPTICAL] Scanning 1550nm Laser Photonic Modulation...</div>
+                  <div class="term-line term-success">[LOCKED] Polarization Coherence: 99.98% (Bell State |Ψ+⟩)</div>
+                  <div class="term-line">[STREAM] Decrypted frame 0x8F2B: 01001100 01101111 01100011 01101011</div>
+                  <div class="term-line">[STREAM] Entropy harvest rate: 4.82 Mpps via SPDC crystal oscillator</div>
+                  <div class="term-line term-cyan">[TELEMETRY] Orbital Relay Delta-4 handshake validated. QBER: 0.031%
+                  </div>
+                  <div class="term-line term-amber">[NOTICE] Continuous quantum key refresh active. No eavesdropping
+                    detected.</div>
+                </div>
+                <!-- Interactive Command Input -->
+                <form class="matrix-cli-form" onsubmit="handleMatrixCommand(event)">
+                  <span class="cli-prompt">matrix@cipherbeam:~$</span>
+                  <input type="text" id="matrixCommandInput" class="cli-input"
+                    placeholder="Type command (e.g. status, decrypt, scan, help)..." autocomplete="off" />
+                  <button type="submit" class="cli-submit-btn">RUN</button>
+                </form>
+              </div>
+
+              <!-- Right: Carrier Wave Analyzer & Matrix Node Interception -->
+              <div class="matrix-panel-card">
+                <div class="matrix-card-header">
+                  <div class="card-title-wrap">
+                    <span class="matrix-led led-cyan"></span>
+                    <span>OPTICAL CARRIER WAVE SPECTRUM ANALYZER</span>
+                  </div>
+                  <span class="matrix-protocol-tag">λ = 1550.12 nm</span>
+                </div>
+
+                <!-- Live Carrier Frequency Canvas -->
+                <div class="spectrum-canvas-wrap">
+                  <canvas id="carrierSpectrumCanvas" class="spectrum-canvas"></canvas>
+                  <div class="spectrum-overlay-info">
+                    <span class="spec-tag">CENTER: 193.4 THz</span>
+                    <span class="spec-tag">SNR: 44.8 dB</span>
+                    <span class="spec-tag">MOD: QPSK-DWDM</span>
+                  </div>
+                </div>
+
+                <!-- Stealth Interception Nodes -->
+                <div class="stealth-node-grid">
+                  <div class="stealth-node-card">
+                    <div class="node-badge-row">
+                      <span class="stealth-dot online"></span>
+                      <span class="stealth-name">NODE-ALPHA-GROUND</span>
+                    </div>
+                    <div class="stealth-metric">SIGNAL: <strong class="text-primary">-12.4 dBm</strong></div>
+                    <div class="stealth-sub">Phase-locked to 850nm laser beam</div>
+                  </div>
+
+                  <div class="stealth-node-card">
+                    <div class="node-badge-row">
+                      <span class="stealth-dot online"></span>
+                      <span class="stealth-name">ORBITAL-RELAY-04</span>
+                    </div>
+                    <div class="stealth-metric">FLUX: <strong class="text-cyan">99.8% FIDELITY</strong></div>
+                    <div class="stealth-sub">Laser gimbal tracking locked 0.02μrad</div>
+                  </div>
+
+                  <div class="stealth-node-card">
+                    <div class="node-badge-row">
+                      <span class="stealth-dot tracking"></span>
+                      <span class="stealth-name">DARK-FIBER-TAP-09</span>
+                    </div>
+                    <div class="stealth-metric">STEALTH: <strong class="text-violet">ACTIVE PASSIVE</strong></div>
+                    <div class="stealth-sub">Quantum non-demolition monitor</div>
+                  </div>
+
+                  <div class="stealth-node-card">
+                    <div class="node-badge-row">
+                      <span class="stealth-dot online"></span>
+                      <span class="stealth-name">ENTROPY-HARVESTER</span>
+                    </div>
+                    <div class="stealth-metric">POOL: <strong class="text-amber">256-BIT SEED</strong></div>
+                    <div class="stealth-sub">NIST SP 800-90B compliant noise</div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
