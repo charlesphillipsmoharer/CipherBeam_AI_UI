@@ -381,9 +381,46 @@ function handleAuthSubmit(e) {
 
 function completeAuthentication() {
   const authPortal = document.getElementById('authPortal');
+  const appContainer = document.getElementById('appContainer');
+
   if (authPortal) {
     authPortal.classList.add('hidden');
   }
+
+  // Cinematic smooth transition from login to homescreen
+  if (appContainer) {
+    appContainer.classList.remove('login-mode');
+    appContainer.classList.add('entering');
+    setTimeout(() => {
+      appContainer.classList.remove('entering');
+    }, 900);
+  }
+
+  // Enforce: The dashboard should remain hidden at first glance after we login
+  isSidebarCollapsed = true;
+  const workspaceGrid = document.getElementById('workspaceGrid');
+  const sidebarPanel = document.getElementById('sidebarPanel');
+  const floatingBtn = document.getElementById('floatingDashboardBtn');
+  const toggleBtn = document.getElementById('toggleDashboardBtn');
+  const toggleLabel = document.getElementById('sidebarToggleLabel');
+  const toggleIcon = document.getElementById('sidebarToggleIcon');
+  const revealBanner = document.getElementById('dashboardRevealBanner');
+
+  if (workspaceGrid) workspaceGrid.classList.add('sidebar-collapsed');
+  if (sidebarPanel) {
+    sidebarPanel.classList.add('collapsed');
+    sidebarPanel.classList.remove('revealing');
+  }
+  if (floatingBtn) floatingBtn.classList.add('visible');
+  if (toggleBtn) toggleBtn.classList.add('collapsed');
+  if (toggleLabel) toggleLabel.textContent = 'SHOW DASHBOARD';
+  if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+  if (revealBanner) revealBanner.classList.remove('hidden');
+
+  if (window.lucide) {
+    lucide.createIcons();
+  }
+
   showToast('ACCESS GRANTED // CIPHERBEAM SYSTEM ONLINE');
   startWaveformAnimation();
   if (telemetryInterval) clearInterval(telemetryInterval);
@@ -392,6 +429,8 @@ function completeAuthentication() {
 function lockTerminal() {
   playCyberTone('click');
   const authPortal = document.getElementById('authPortal');
+  const appContainer = document.getElementById('appContainer');
+
   if (authPortal) {
     authPortal.classList.remove('hidden');
     isScanning = false;
@@ -403,6 +442,32 @@ function lockTerminal() {
     focus3DWindow('center');
     startAuthTelemetryStream();
   }
+
+  if (appContainer) {
+    appContainer.classList.add('login-mode');
+  }
+
+  // Reset dashboard to hidden state for subsequent login
+  isSidebarCollapsed = true;
+  const workspaceGrid = document.getElementById('workspaceGrid');
+  const sidebarPanel = document.getElementById('sidebarPanel');
+  const floatingBtn = document.getElementById('floatingDashboardBtn');
+  const toggleBtn = document.getElementById('toggleDashboardBtn');
+  const toggleLabel = document.getElementById('sidebarToggleLabel');
+  const toggleIcon = document.getElementById('sidebarToggleIcon');
+  const revealBanner = document.getElementById('dashboardRevealBanner');
+
+  if (workspaceGrid) workspaceGrid.classList.add('sidebar-collapsed');
+  if (sidebarPanel) {
+    sidebarPanel.classList.add('collapsed');
+    sidebarPanel.classList.remove('revealing');
+  }
+  if (floatingBtn) floatingBtn.classList.add('visible');
+  if (toggleBtn) toggleBtn.classList.add('collapsed');
+  if (toggleLabel) toggleLabel.textContent = 'SHOW DASHBOARD';
+  if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+  if (revealBanner) revealBanner.classList.remove('hidden');
+
   showToast('Terminal Locked. Biometric credentials required.');
 }
 
@@ -473,7 +538,7 @@ function handleEncryptAction(event) {
   const iconEl = document.getElementById('encryptIcon');
   const textEl = document.getElementById('encryptText');
 
-  if (iconEl) iconEl.textContent = '⚡';
+  if (iconEl) iconEl.textContent = '[*]';
   if (textEl) textEl.textContent = 'SCRAMBLING MATRIX...';
 
   const text = messageInput ? messageInput.value : 'CIPHERBEAM PAYLOAD';
@@ -498,7 +563,7 @@ function handleEncryptAction(event) {
 
     if (counter > 12) {
       clearInterval(interval);
-      if (iconEl) iconEl.textContent = '🔐';
+      if (iconEl) iconEl.textContent = '[>]';
       if (textEl) textEl.textContent = 'ENCRYPT';
 
       // Compute simulated real deterministic hex output
@@ -590,7 +655,7 @@ function stopLaserSpoolAudio() {
         try {
           laserSpoolNodes.osc.stop();
           laserSpoolNodes.subOsc.stop();
-        } catch (_) {}
+        } catch (_) { }
         laserSpoolNodes = null;
       }, 110);
     } catch (_) {
@@ -599,25 +664,39 @@ function stopLaserSpoolAudio() {
   }
 }
 
-// Interactive 3D Inspection: Parallax Tilt on Cursor Move
+// Interactive 3D Inspection: Parallax Tilt on Cursor Move with stability lock for button clicks
 function setupChamber3DInspection() {
   const viewport = document.getElementById('chamberViewport') || document.getElementById('opticalModal');
   const chassis = document.getElementById('chamberChassis');
+  const actionRow = document.querySelector('.chamber-action-row');
+  const closeModalBtn = document.getElementById('closeModalBtn');
   if (!viewport || !chassis) return;
 
   viewport.onmousemove = (e) => {
-    const rect = viewport.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+    // When cursor enters the action row or close button, freeze/neutralize 3D tilt so clicking is effortless and stable
+    if (actionRow && actionRow.contains(e.target)) {
+      chassis.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      return;
+    }
 
-    const rotY = (x * 24).toFixed(2);  // up to ±12 degrees
-    const rotX = (-y * 18).toFixed(2); // up to ±9 degrees
+    const rect = viewport.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+
+    const rotY = (x * 16).toFixed(2);
+    const rotX = (-y * 12).toFixed(2);
     chassis.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
   };
 
   viewport.onmouseleave = () => {
     chassis.style.transform = 'rotateX(0deg) rotateY(0deg)';
   };
+
+  if (actionRow) {
+    actionRow.onmouseenter = () => {
+      chassis.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    };
+  }
 }
 
 function resetChamber3DInspection() {
@@ -633,6 +712,10 @@ function resetChamber3DInspection() {
 }
 
 function handleTransmitAction(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
   createButtonRipple(event);
   playCyberTone('transmit');
   startLaserSpoolAudio();
@@ -646,7 +729,10 @@ function handleTransmitAction(event) {
   const flare = document.getElementById('targetCollisionFlare');
   const cells = document.querySelectorAll('#chargeCellsGrid .cell');
 
-  if (modal) modal.classList.add('active');
+  if (modal) {
+    modal.style.display = '';
+    modal.classList.add('active');
+  }
   if (closeModalBtn) closeModalBtn.style.display = 'none';
   if (flare) flare.classList.remove('active');
 
@@ -711,11 +797,24 @@ function handleTransmitAction(event) {
       clearInterval(transmitInterval);
       transmitInterval = null;
 
+      const chassis = document.getElementById('chamberChassis');
+      const viewport = document.getElementById('chamberViewport') || document.getElementById('opticalModal');
+      // Lock chassis perfectly flat and motionless so user can click confirmation button without jitter
+      if (chassis) {
+        chassis.style.transform = 'rotateX(0deg) rotateY(0deg)';
+      }
+      if (viewport) {
+        viewport.onmousemove = null;
+      }
+
       if (progressLabel) {
-        progressLabel.textContent = '✓ TRANSMISSION COMPLETE: Acknowledgment Received by ESP32 (0ms Jitter)';
+        progressLabel.textContent = '[STATUS: 200 OK] TRANSMISSION COMPLETE // ESP32 ACK RECEIVED (0ms Jitter)';
         progressLabel.style.color = 'var(--primary)';
       }
-      if (closeModalBtn) closeModalBtn.style.display = 'inline-flex';
+      if (closeModalBtn) {
+        closeModalBtn.style.display = 'inline-flex';
+        closeModalBtn.focus();
+      }
       playCyberTone('auth-success');
 
       totalPacketsTransmitted += parseInt(typeof packetCount !== 'undefined' && packetCount ? packetCount.textContent : '2');
@@ -728,6 +827,44 @@ function handleTransmitAction(event) {
   }, 110);
 }
 
+function returnToHomeScreen() {
+  try {
+    // 1. Switch active view to Compose tab (the primary Home screen)
+    const composeNavBtn = document.querySelector(".nav-menu button[onclick*='compose']") || document.querySelector('.nav-item-btn');
+    switchNavTab('compose', composeNavBtn);
+
+    // 2. Return dashboard navigation to the collapsed homescreen state
+    isSidebarCollapsed = true;
+    const workspaceGrid = document.getElementById('workspaceGrid');
+    const sidebarPanel = document.getElementById('sidebarPanel');
+    const floatingBtn = document.getElementById('floatingDashboardBtn');
+    const toggleBtn = document.getElementById('toggleDashboardBtn');
+    const toggleLabel = document.getElementById('sidebarToggleLabel');
+    const toggleIcon = document.getElementById('sidebarToggleIcon');
+    const revealBanner = document.getElementById('dashboardRevealBanner');
+
+    if (workspaceGrid) workspaceGrid.classList.add('sidebar-collapsed');
+    if (sidebarPanel) {
+      sidebarPanel.classList.remove('revealing');
+      sidebarPanel.classList.add('collapsed');
+    }
+    if (floatingBtn) floatingBtn.classList.add('visible');
+    if (toggleBtn) toggleBtn.classList.add('collapsed');
+    if (toggleLabel) toggleLabel.textContent = 'SHOW DASHBOARD';
+    if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-open');
+    if (revealBanner) revealBanner.classList.remove('hidden');
+
+    if (window.lucide) {
+      lucide.createIcons();
+    }
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    showToast('POD DISENGAGED // RETURNED TO HOMESCREEN');
+  } catch (err) {
+    console.error('Error returning to home screen:', err);
+  }
+}
+
 function closeTransmissionModal() {
   playCyberTone('click');
   stopLaserSpoolAudio();
@@ -738,7 +875,10 @@ function closeTransmissionModal() {
   }
 
   const modal = document.getElementById('opticalModal');
-  if (modal) modal.classList.remove('active');
+  if (modal) {
+    modal.classList.remove('active');
+    modal.style.display = 'none';
+  }
 
   if (beamAnimId) {
     cancelAnimationFrame(beamAnimId);
@@ -751,7 +891,15 @@ function closeTransmissionModal() {
   const cells = document.querySelectorAll('#chargeCellsGrid .cell');
   cells.forEach(c => c.classList.remove('lit'));
 
+  const closeModalBtn = document.getElementById('closeModalBtn');
+  if (closeModalBtn) {
+    closeModalBtn.style.display = 'none';
+  }
+
   resetChamber3DInspection();
+
+  // Return to the home screen
+  returnToHomeScreen();
 }
 
 // Particle Beam Canvas Renderer with Coherent Laser Core & Collision Sparks
@@ -1130,7 +1278,7 @@ function toggleMatrixRain() {
 // ========================================================
 // 10. COLLAPSIBLE DASHBOARD NAVIGATION & HIDDEN DASHBOARD BUTTON
 // ========================================================
-let isSidebarCollapsed = false;
+let isSidebarCollapsed = true;
 
 function toggleDashboardSidebar() {
   playCyberTone('click');
@@ -1142,23 +1290,35 @@ function toggleDashboardSidebar() {
   const toggleBtn = document.getElementById('toggleDashboardBtn');
   const toggleLabel = document.getElementById('sidebarToggleLabel');
   const toggleIcon = document.getElementById('sidebarToggleIcon');
+  const revealBanner = document.getElementById('dashboardRevealBanner');
 
   if (isSidebarCollapsed) {
     if (workspaceGrid) workspaceGrid.classList.add('sidebar-collapsed');
-    if (sidebarPanel) sidebarPanel.classList.add('collapsed');
+    if (sidebarPanel) {
+      sidebarPanel.classList.remove('revealing');
+      sidebarPanel.classList.add('collapsed');
+    }
     if (floatingBtn) floatingBtn.classList.add('visible');
     if (toggleBtn) toggleBtn.classList.add('collapsed');
     if (toggleLabel) toggleLabel.textContent = 'SHOW DASHBOARD';
     if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-open');
-    showToast('Dashboard Navigation: HIDDEN // Workspace Expanded');
+    if (revealBanner) revealBanner.classList.remove('hidden');
+    showToast('Dashboard Navigation: HIDDEN // Workspace Focused');
   } else {
     if (workspaceGrid) workspaceGrid.classList.remove('sidebar-collapsed');
-    if (sidebarPanel) sidebarPanel.classList.remove('collapsed');
+    if (sidebarPanel) {
+      sidebarPanel.classList.remove('collapsed');
+      sidebarPanel.classList.add('revealing');
+      setTimeout(() => {
+        sidebarPanel.classList.remove('revealing');
+      }, 550);
+    }
     if (floatingBtn) floatingBtn.classList.remove('visible');
     if (toggleBtn) toggleBtn.classList.remove('collapsed');
     if (toggleLabel) toggleLabel.textContent = 'HIDE DASHBOARD';
     if (toggleIcon) toggleIcon.setAttribute('data-lucide', 'panel-left-close');
-    showToast('Dashboard Navigation: RESTORED');
+    if (revealBanner) revealBanner.classList.add('hidden');
+    showToast('Dashboard Navigation: REVEALED [3D HUD]');
   }
 
   if (window.lucide) {
@@ -1351,24 +1511,38 @@ window.addEventListener('DOMContentLoaded', () => {
   startLiveHardwareSimulation();
   init3DParallax();
   initMatrixRain();
+
+  // Transmission modal backdrop click listener (only fires on clicks on the modal backdrop outside the chassis)
+  const modal = document.getElementById('opticalModal');
+  const chassis = document.getElementById('chamberChassis');
+
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (modal.classList.contains('active')) {
+        if (e.target === modal || (chassis && !chassis.contains(e.target))) {
+          closeTransmissionModal();
+        }
+      }
+    });
+  }
+
+  if (chassis) {
+    chassis.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
+
   if (window.lucide) {
     lucide.createIcons();
   }
 });
 
-// Global keyboard shortcuts & modal backdrop dismiss
+// Global keyboard shortcuts: ESC dismisses transmission modal and returns to homescreen
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     const modal = document.getElementById('opticalModal');
     if (modal && modal.classList.contains('active')) {
       closeTransmissionModal();
     }
-  }
-});
-
-window.addEventListener('click', (e) => {
-  const modal = document.getElementById('opticalModal');
-  if (modal && e.target === modal && modal.classList.contains('active')) {
-    closeTransmissionModal();
   }
 });
