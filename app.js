@@ -1,11 +1,3 @@
-/**
- * CIPHERBEAM AI - Secure Optical Communication
- * Interactive Logic, Cryptographic Visualizer, Biometric Scanner, and Optical Photon Engine
- */
-
-// ========================================================
-// 1. WEB AUDIO API SYNTHESIZER (Pleasant soothing sci-fi tones)
-// ========================================================
 let audioCtx = null;
 let soundEnabled = true;
 
@@ -96,10 +88,233 @@ function toggleAudioFx() {
 }
 
 // ========================================================
-// 2. BIOMETRIC SCANNER & AUTHENTICATION PORTAL
+// 2. 3D HOLOGRAPHIC STAGE, PARALLAX ENGINE & AUTH PORTAL
 // ========================================================
+let is3DEnabled = true;
+let currentRotX = 0;
+let currentRotY = 0;
+let targetRotX = 0;
+let targetRotY = 0;
+let parallaxRaf = null;
+let telemetryInterval = null;
+let activeWindow = 'center'; // 'left' | 'center' | 'right'
 let authMode = 'login'; // 'login' | 'signup'
 let isScanning = false;
+
+function init3DParallax() {
+  const authPortal = document.getElementById('authPortal');
+  if (!authPortal) return;
+
+  // Mouse move parallax listener
+  authPortal.addEventListener('mousemove', (e) => {
+    if (!is3DEnabled) return;
+    const rect = authPortal.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const normX = (e.clientX - centerX) / (rect.width / 2);
+    const normY = (e.clientY - centerY) / (rect.height / 2);
+
+    targetRotY = normX * 13; // Max 13 deg yaw
+    targetRotX = -normY * 9; // Max 9 deg pitch
+  });
+
+  // Smoothly return toward center when mouse leaves
+  authPortal.addEventListener('mouseleave', () => {
+    targetRotX = 0;
+    targetRotY = 0;
+  });
+
+  // Touch move for mobile devices
+  authPortal.addEventListener('touchmove', (e) => {
+    if (!is3DEnabled || !e.touches || !e.touches[0]) return;
+    const touch = e.touches[0];
+    const rect = authPortal.getBoundingClientRect();
+    const centerX = rect.left + rect.width / 2;
+    const centerY = rect.top + rect.height / 2;
+    const normX = (touch.clientX - centerX) / (rect.width / 2);
+    const normY = (touch.clientY - centerY) / (rect.height / 2);
+
+    targetRotY = normX * 10;
+    targetRotX = -normY * 7;
+  }, { passive: true });
+
+  // Optional Gyroscope tilt on mobile
+  if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (e) => {
+      if (!is3DEnabled || e.gamma === null) return;
+      targetRotY = Math.max(-12, Math.min(12, e.gamma * 0.45));
+      targetRotX = Math.max(-9, Math.min(9, (e.beta - 40) * 0.35));
+    });
+  }
+
+  // High-FPS RequestAnimationFrame smooth lerp loop
+  function animate3D() {
+    if (is3DEnabled) {
+      currentRotX += (targetRotX - currentRotX) * 0.08;
+      currentRotY += (targetRotY - currentRotY) * 0.08;
+
+      const stage = document.getElementById('auth3DStage');
+      if (stage) {
+        stage.style.transform = `rotateX(${currentRotX.toFixed(2)}deg) rotateY(${currentRotY.toFixed(2)}deg)`;
+      }
+    }
+    parallaxRaf = requestAnimationFrame(animate3D);
+  }
+  if (!parallaxRaf) {
+    parallaxRaf = requestAnimationFrame(animate3D);
+  }
+
+  // Hover sound on the 3D logo
+  const logo = document.getElementById('authCipherLogo');
+  if (logo) {
+    logo.addEventListener('mouseenter', () => {
+      playCyberTone('click');
+    });
+  }
+
+  startAuthTelemetryStream();
+}
+
+function reset3DStage(e) {
+  if (e) e.stopPropagation();
+  playCyberTone('click');
+  currentRotX = 0;
+  currentRotY = 0;
+  targetRotX = 0;
+  targetRotY = 0;
+  focus3DWindow('center');
+  const stage = document.getElementById('auth3DStage');
+  if (stage) {
+    stage.style.transform = 'rotateX(0deg) rotateY(0deg)';
+  }
+  showToast('3D Perspective Recalibrated // Center Lock');
+}
+
+function toggle3DPerspective(e) {
+  if (e) e.stopPropagation();
+  playCyberTone('click');
+  is3DEnabled = !is3DEnabled;
+  const btn = document.getElementById('btn3DToggle');
+  const stage = document.getElementById('auth3DStage');
+
+  if (is3DEnabled) {
+    if (btn) btn.textContent = '3D ON';
+    showToast('3D Spatial Perspective: ACTIVE');
+  } else {
+    if (btn) btn.textContent = '3D OFF';
+    currentRotX = 0;
+    currentRotY = 0;
+    targetRotX = 0;
+    targetRotY = 0;
+    if (stage) {
+      stage.style.transform = 'rotateX(0deg) rotateY(0deg)';
+    }
+    showToast('3D Spatial Perspective: LOCKED FLAT');
+  }
+}
+
+function focus3DWindow(which) {
+  activeWindow = which;
+  playCyberTone('click');
+
+  const winLeft = document.getElementById('windowQkd');
+  const winCenter = document.getElementById('windowCenter');
+  const winRight = document.getElementById('windowNodes');
+
+  const dockLeft = document.getElementById('dockBtnLeft');
+  const dockCenter = document.getElementById('dockBtnCenter');
+  const dockRight = document.getElementById('dockBtnRight');
+
+  // Reset focus classes
+  [winLeft, winCenter, winRight].forEach(win => {
+    if (win) {
+      win.classList.remove('focused', 'dock-active');
+    }
+  });
+  if (winCenter) winCenter.classList.remove('dock-hidden');
+
+  // Reset dock button states
+  [dockLeft, dockCenter, dockRight].forEach(btn => {
+    if (btn) btn.classList.remove('active');
+  });
+
+  if (which === 'left') {
+    if (winLeft) {
+      winLeft.classList.add('focused', 'dock-active');
+    }
+    if (winCenter) winCenter.classList.add('dock-hidden');
+    if (dockLeft) dockLeft.classList.add('active');
+  } else if (which === 'right') {
+    if (winRight) {
+      winRight.classList.add('focused', 'dock-active');
+    }
+    if (winCenter) winCenter.classList.add('dock-hidden');
+    if (dockRight) dockRight.classList.add('active');
+  } else {
+    if (winCenter) winCenter.classList.add('focused');
+    if (dockCenter) dockCenter.classList.add('active');
+  }
+}
+
+function toggle3DWindow(e, which) {
+  if (e) e.stopPropagation();
+  playCyberTone('click');
+  focus3DWindow('center');
+}
+
+function expand3DWindow(e, which) {
+  if (e) e.stopPropagation();
+  focus3DWindow(which);
+}
+
+// Live Stream Simulator for QKD & Optical Nodes
+function startAuthTelemetryStream() {
+  const telCoherence = document.getElementById('telCoherence');
+  const telCoherenceBar = document.getElementById('telCoherenceBar');
+  const telEntropy = document.getElementById('telEntropy');
+  const qkdStreamContent = document.getElementById('qkdStreamContent');
+
+  const hexSnippets = [
+    '0x8F2B9C 0xE4A108 0x7D3C55 0x1B90FE',
+    '0x3A7F11 0xBC44D2 0x90EA81 0x55F109',
+    '0xD912F8 0x6E44A0 0x11B38C 0xF47E20',
+    '0x41CA89 0x9B12E3 0x68FD11 0x22C74B',
+    '0x0E8FA1 0x73C855 0x911BD4 0x882A0F'
+  ];
+
+  const quantumStates = [
+    'BB84 PROTOCOL | SYNC STATE: PHASE-ALIGNED',
+    'E91 ENTANGLED PROTOCOL | CHSH VIOLATION: S = 2.82',
+    'DECOHERENCE SHIELD: ACTIVE // ZERO INTERCEPTION',
+    'SPDC PHOTON PAIR RATE: OPTIMAL (4.28 Mpps)',
+    'QUANTUM BIT ERROR RATE (QBER): 0.038% [SAFE <5%]'
+  ];
+
+  if (telemetryInterval) clearInterval(telemetryInterval);
+
+  telemetryInterval = setInterval(() => {
+    // Coherence fluctuation 99.82% - 99.96%
+    const coh = (99.82 + Math.random() * 0.14).toFixed(2);
+    if (telCoherence) telCoherence.textContent = `${coh}%`;
+    if (telCoherenceBar) telCoherenceBar.style.width = `${coh}%`;
+
+    // Entropy fluctuation 4.2 - 4.4 Mpps
+    const ent = (4.2 + Math.random() * 0.2).toFixed(2);
+    if (telEntropy) telEntropy.textContent = `${ent} Mpps`;
+
+    // Stream lines
+    if (qkdStreamContent) {
+      const randHex1 = hexSnippets[Math.floor(Math.random() * hexSnippets.length)];
+      const randHex2 = hexSnippets[Math.floor(Math.random() * hexSnippets.length)];
+      const randState = quantumStates[Math.floor(Math.random() * quantumStates.length)];
+      const binarySample = Array.from({ length: 4 }, () =>
+        Math.floor(Math.random() * 256).toString(2).padStart(8, '0')
+      ).join(' ');
+
+      qkdStreamContent.textContent = `${binarySample}\n${randHex1}\n${randState}\nESTIMATED QBER: 0.0${Math.floor(25 + Math.random() * 25)}% [THRESHOLD: <5%]`;
+    }
+  }, 1600);
+}
 
 function switchAuthMode(mode) {
   authMode = mode;
@@ -171,6 +386,7 @@ function completeAuthentication() {
   }
   showToast('ACCESS GRANTED // CIPHERBEAM SYSTEM ONLINE');
   startWaveformAnimation();
+  if (telemetryInterval) clearInterval(telemetryInterval);
 }
 
 function lockTerminal() {
@@ -184,6 +400,8 @@ function lockTerminal() {
       scannerStatusText.textContent = 'Tap to Scan Biometrics';
       scannerStatusText.style.color = 'var(--text-muted)';
     }
+    focus3DWindow('center');
+    startAuthTelemetryStream();
   }
   showToast('Terminal Locked. Biometric credentials required.');
 }
@@ -236,7 +454,7 @@ function onEncryptionChange() {
   const select = document.getElementById('encryptionSelector');
   const activeCipherTag = document.getElementById('activeCipherTag');
   const transmissionCipherBadge = document.getElementById('transmissionCipherBadge');
-  
+
   if (select) {
     const val = select.value;
     if (activeCipherTag) activeCipherTag.textContent = `${val} AUTHENTICATED`;
@@ -252,7 +470,7 @@ function handleEncryptAction(event) {
 
   const iconEl = document.getElementById('encryptIcon');
   const textEl = document.getElementById('encryptText');
-  
+
   if (iconEl) iconEl.textContent = '⚡';
   if (textEl) textEl.textContent = 'SCRAMBLING MATRIX...';
 
@@ -280,14 +498,14 @@ function handleEncryptAction(event) {
       clearInterval(interval);
       if (iconEl) iconEl.textContent = '🔐';
       if (textEl) textEl.textContent = 'ENCRYPT';
-      
+
       // Compute simulated real deterministic hex output
       let simulatedHex = '';
       for (let i = 0; i < Math.min(text.length, 32); i++) {
         simulatedHex += '0x' + text.charCodeAt(i).toString(16).padStart(2, '0') + text.charCodeAt((i + 3) % text.length).toString(16).padStart(2, '0') + ' ';
       }
       if (!simulatedHex) simulatedHex = '0x7f4e91bc 0xaa28c031 0x5109b8d2 0x93ef1802 0x8b32cf09 0x6e8812c4';
-      
+
       if (hexViewer) {
         hexViewer.textContent = simulatedHex + ' [IV: 0x9e1f44a8] [TAG: 0xc831d044ea1b]';
       }
@@ -365,7 +583,7 @@ function startOpticalBeamCanvas() {
   const canvas = document.getElementById('opticalBeamCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
-  
+
   canvas.width = canvas.parentElement.clientWidth;
   canvas.height = canvas.parentElement.clientHeight;
 
@@ -447,9 +665,9 @@ function startWaveformAnimation() {
 
     ctx.beginPath();
     for (let x = 0; x < canvas.width; x++) {
-      const y = canvas.height / 2 + 
-                Math.sin((x + offset) * 0.05) * 20 * Math.sin(x * 0.01) +
-                Math.cos((x - offset) * 0.08) * 8;
+      const y = canvas.height / 2 +
+        Math.sin((x + offset) * 0.05) * 20 * Math.sin(x * 0.01) +
+        Math.cos((x - offset) * 0.08) * 8;
       if (x === 0) ctx.moveTo(x, y);
       else ctx.lineTo(x, y);
     }
@@ -526,7 +744,7 @@ function startLiveHardwareSimulation() {
     // Slight realistic temperature oscillation (+- 0.3°C)
     const variation = (Math.random() - 0.5) * 0.4;
     const currentTemp = (baseTemp + variation).toFixed(1);
-    
+
     if (footerTemp) footerTemp.textContent = `${currentTemp}°C`;
     if (analyticsTemp) analyticsTemp.textContent = `${currentTemp}°C`;
 
@@ -542,4 +760,8 @@ function startLiveHardwareSimulation() {
 window.addEventListener('DOMContentLoaded', () => {
   updateMessageTelemetry();
   startLiveHardwareSimulation();
+  init3DParallax();
+  if (window.lucide) {
+    lucide.createIcons();
+  }
 });

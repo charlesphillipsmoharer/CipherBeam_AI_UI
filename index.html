@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -8,6 +9,7 @@
   <!-- Lucide Icons -->
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
+
 <body>
   <!-- Ambient cyber background & scanlines -->
   <div class="cyber-background"></div>
@@ -17,76 +19,389 @@
        1. ANIMATED LOGIN / SIGNUP PORTAL
        ======================================================= -->
   <div class="auth-wrapper" id="authPortal">
-    <div class="auth-card">
-      <div class="hud-corner-tl"></div>
-      <div class="hud-corner-tr"></div>
-      <div class="hud-corner-bl"></div>
-      <div class="hud-corner-br"></div>
+    <!-- Ambient 3D Depth Elements -->
+    <div class="holo-depth-background">
+      <div class="holo-grid-plane"></div>
+      <div class="holo-particle-field" id="holoParticles"></div>
+      <div class="holo-scan-ring-large"></div>
+    </div>
 
-      <div class="auth-header">
-        <div class="auth-badge">
-          <span class="pulse-dot"></span>
-          <span>Security Clearance Level 5</span>
-        </div>
-        <h1 class="auth-title">
-          <span class="brand-title-accent">CIPHERBEAM</span> AI
-        </h1>
-        <p class="auth-subtitle">SECURE OPTICAL COMMUNICATION SYSTEM</p>
-      </div>
+    <!-- 3D Viewport & Stage -->
+    <div class="auth-3d-viewport" id="auth3DViewport">
+      <div class="auth-3d-stage" id="auth3DStage">
 
-      <!-- Biometric Scanner -->
-      <div class="biometric-container" id="biometricBtn" title="Click to simulate Biometric Authentication">
-        <div class="biometric-scanner" id="biometricScannerRing">
-          <div class="scanner-laser"></div>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 2a10 10 0 0 0-10 10c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z"/>
-          </svg>
-        </div>
-        <span class="scanner-label" id="scannerStatusText">Tap to Scan Biometrics</span>
-      </div>
+        <!-- ================= LEFT 3D WINDOW: QKD TELEMETRY ================= -->
+        <div class="auth-window auth-window-left" id="windowQkd" onclick="focus3DWindow('left')">
+          <div class="hud-corner-tl"></div>
+          <div class="hud-corner-tr"></div>
+          <div class="hud-corner-bl"></div>
+          <div class="hud-corner-br"></div>
 
-      <!-- Login / Signup Selector -->
-      <div class="auth-tabs">
-        <button class="auth-tab-btn active" id="tabLogin" onclick="switchAuthMode('login')">TERMINAL LOGIN</button>
-        <button class="auth-tab-btn" id="tabSignup" onclick="switchAuthMode('signup')">REQUEST CLEARANCE</button>
-      </div>
+          <div class="auth-window-header">
+            <div class="window-title-wrap">
+              <span class="window-status-beacon pulse-emerald"></span>
+              <span class="window-title">QUANTUM TELEMETRY // QKD</span>
+            </div>
+            <div class="window-controls">
+              <button type="button" class="win-btn win-min" title="Minimize/Dock"
+                onclick="toggle3DWindow(event, 'left')">—</button>
+              <button type="button" class="win-btn win-max" title="Bring to Focus"
+                onclick="expand3DWindow(event, 'left')">□</button>
+              <button type="button" class="win-btn win-close" title="Dismiss"
+                onclick="toggle3DWindow(event, 'left')">✕</button>
+            </div>
+          </div>
 
-      <!-- Auth Form -->
-      <form id="authForm" onsubmit="handleAuthSubmit(event)">
-        <div class="form-group">
-          <label class="form-label" id="userIdLabel">Operator Call-Sign / ID</label>
-          <div class="form-input-wrap">
-            <input type="text" class="form-input" id="authIdentifier" placeholder="CYBER-BEAM-01" value="OPERATOR-DELTA" required />
-            <i data-lucide="user"></i>
+          <div class="window-body">
+            <!-- Telemetry Metrics Grid -->
+            <div class="telemetry-grid">
+              <div class="telemetry-card">
+                <span class="tel-label">PHOTON COHERENCE</span>
+                <span class="tel-val text-primary" id="telCoherence">99.87%</span>
+                <div class="tel-meter">
+                  <div class="tel-bar" id="telCoherenceBar" style="width: 99.87%;"></div>
+                </div>
+              </div>
+              <div class="telemetry-card">
+                <span class="tel-label">WAVELENGTH (λ)</span>
+                <span class="tel-val text-cyan">1550.12 nm</span>
+                <span class="tel-sub">DWDM CH-42 OPTICAL</span>
+              </div>
+              <div class="telemetry-card">
+                <span class="tel-label">ENTANGLEMENT</span>
+                <span class="tel-val text-violet">LOCKED (Ψ+)</span>
+                <span class="tel-sub">BELL STATE VERIFIED</span>
+              </div>
+              <div class="telemetry-card">
+                <span class="tel-label">ENTROPY RATE</span>
+                <span class="tel-val text-amber" id="telEntropy">4.28 Mpps</span>
+                <span class="tel-sub">SPDC SOURCE: ACTIVE</span>
+              </div>
+            </div>
+
+            <!-- Live Hex/Qubit Cryptographic Stream -->
+            <div class="qkd-stream-box">
+              <div class="stream-header">
+                <span>LIVE PHOTON KEY STREAM</span>
+                <span class="stream-badge">REALTIME</span>
+              </div>
+              <pre class="stream-content" id="qkdStreamContent">01001101 01100001 01110100 01110010
+0x8F2B9C 0xE4A108 0x7D3C55 0x1B90FE
+BB84 PROTOCOL | SYNC STATE: PHASE-ALIGNED
+ESTIMATED QBER: 0.042% [THRESHOLD: &lt;5%]</pre>
+            </div>
+
+            <div class="window-footer-hint">
+              <i data-lucide="shield"></i>
+              <span>AES-256-GCM / POST-QUANTUM KYBER READY</span>
+            </div>
           </div>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Quantum Key / Access Passphrase</label>
-          <div class="form-input-wrap">
-            <input type="password" class="form-input" id="authPassword" placeholder="••••••••••••" value="cipherbeam2026" required />
-            <i data-lucide="shield-check"></i>
+        <!-- ================= CENTER 3D WINDOW: PRIMARY LOGIN TERMINAL ================= -->
+        <div class="auth-window auth-window-center focused" id="windowCenter">
+          <div class="hud-corner-tl"></div>
+          <div class="hud-corner-tr"></div>
+          <div class="hud-corner-bl"></div>
+          <div class="hud-corner-br"></div>
+          <div class="window-depth-accent"></div>
+
+          <div class="auth-window-header">
+            <div class="window-title-wrap">
+              <span class="window-status-beacon pulse-emerald"></span>
+              <span class="window-title">SECURE OPERATOR ACCESS TERMINAL</span>
+            </div>
+            <div class="window-controls">
+              <button type="button" class="win-btn win-min" title="Reset 3D Perspective"
+                onclick="reset3DStage(event)">↺</button>
+              <button type="button" class="win-btn win-max" id="btn3DToggle" title="Toggle 3D Tilt Effect"
+                onclick="toggle3DPerspective(event)">3D ON</button>
+            </div>
+          </div>
+
+          <div class="window-body center-terminal-body">
+            <!-- Animated 3D Optical Cipher Logo Component -->
+            <div class="logo-hero-container">
+              <div class="cipher-logo-emblem" id="authCipherLogo" title="CIPHERBEAM AI - 3D Optical Core">
+                <div class="logo-3d-rig">
+                  <!-- Holographic Projection Ground Disc -->
+                  <div class="holo-projection-disc"></div>
+
+                  <!-- Outer Counter-Clockwise Precision Gyro Ring -->
+                  <svg class="logo-gyro-ring ring-outer" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="46" fill="none" stroke="rgba(16, 185, 129, 0.45)" stroke-width="1.2"
+                      stroke-dasharray="5, 4" />
+                    <circle cx="50" cy="50" r="42" fill="none" stroke="rgba(6, 182, 212, 0.35)" stroke-width="0.8" />
+                    <line x1="50" y1="2" x2="50" y2="7" stroke="#10b981" stroke-width="2" />
+                    <line x1="50" y1="93" x2="50" y2="98" stroke="#10b981" stroke-width="2" />
+                    <line x1="2" y1="50" x2="7" y2="50" stroke="#06b6d4" stroke-width="2" />
+                    <line x1="93" y1="50" x2="98" y2="50" stroke="#06b6d4" stroke-width="2" />
+                    <circle cx="50" cy="3" r="2" fill="#34d399" />
+                    <circle cx="97" cy="50" r="2" fill="#06b6d4" />
+                    <circle cx="50" cy="97" r="2" fill="#8b5cf6" />
+                    <circle cx="3" cy="50" r="2" fill="#10b981" />
+                  </svg>
+
+                  <!-- Inner Clockwise Gyro Ring -->
+                  <svg class="logo-gyro-ring ring-inner" viewBox="0 0 100 100">
+                    <circle cx="50" cy="50" r="33" fill="none" stroke="rgba(139, 92, 246, 0.55)" stroke-width="1.4"
+                      stroke-dasharray="10, 4, 3, 4" />
+                    <polygon points="50,14 53.5,18 50,22 46.5,18" fill="#8b5cf6" />
+                    <polygon points="50,78 53.5,82 50,86 46.5,82" fill="#8b5cf6" />
+                    <polygon points="14,50 18,46.5 22,50 18,53.5" fill="#06b6d4" />
+                    <polygon points="78,50 82,46.5 86,50 82,53.5" fill="#10b981" />
+                  </svg>
+
+                  <!-- Core 3D Optical Refraction Prism -->
+                  <div class="logo-prism-core">
+                    <svg class="prism-svg" viewBox="0 0 80 80">
+                      <defs>
+                        <linearGradient id="prismGrad1" x1="0%" y1="0%" x2="100%" y2="100%">
+                          <stop offset="0%" stop-color="#10b981" stop-opacity="0.95" />
+                          <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.3" />
+                        </linearGradient>
+                        <linearGradient id="prismGrad2" x1="100%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.9" />
+                          <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.4" />
+                        </linearGradient>
+                        <linearGradient id="prismGrad3" x1="50%" y1="0%" x2="50%" y2="100%">
+                          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95" />
+                          <stop offset="100%" stop-color="#10b981" stop-opacity="0.3" />
+                        </linearGradient>
+                        <filter id="coreGlow" x="-50%" y="-50%" width="200%" height="200%">
+                          <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="blur" />
+                          <feMerge>
+                            <feMergeNode in="blur" />
+                            <feMergeNode in="SourceGraphic" />
+                          </feMerge>
+                        </filter>
+                      </defs>
+                      <!-- 3D Geometric Facets -->
+                      <polygon points="40,16 62,30 40,38 18,30" fill="url(#prismGrad3)" stroke="rgba(255,255,255,0.7)"
+                        stroke-width="0.8" />
+                      <polygon points="18,30 40,38 40,64 18,50" fill="url(#prismGrad1)" stroke="rgba(16,185,129,0.85)"
+                        stroke-width="0.8" />
+                      <polygon points="40,38 62,30 62,50 40,64" fill="url(#prismGrad2)" stroke="rgba(6,182,212,0.85)"
+                        stroke-width="0.8" />
+                      <!-- Optical Beam Lines -->
+                      <line x1="8" y1="40" x2="72" y2="40" stroke="#ffffff" stroke-width="1.2" filter="url(#coreGlow)"
+                        opacity="0.85" stroke-dasharray="25, 8" />
+                      <!-- Core Radiant Light -->
+                      <circle cx="40" cy="38" r="4.5" fill="#ffffff" filter="url(#coreGlow)" />
+                      <circle cx="40" cy="38" r="2.2" fill="#34d399" />
+                    </svg>
+                    <div class="photon-wave wave-1"></div>
+                    <div class="photon-wave wave-2"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="auth-header">
+              <div class="auth-badge">
+                <span class="pulse-dot"></span>
+                <span>Security Clearance Level 5</span>
+              </div>
+              <h1 class="auth-title">
+                <span class="brand-title-accent">CIPHERBEAM</span> AI
+              </h1>
+              <p class="auth-subtitle">SECURE OPTICAL COMMUNICATION SYSTEM</p>
+            </div>
+
+            <!-- Biometric Scanner with 3D Depth Ring -->
+            <div class="biometric-container" id="biometricBtn" title="Click to simulate Biometric Authentication">
+              <div class="biometric-scanner" id="biometricScannerRing">
+                <div class="scanner-laser"></div>
+                <div class="scanner-ring-pulse"></div>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"
+                  stroke-linejoin="round">
+                  <path
+                    d="M12 2a10 10 0 0 0-10 10c0 4.42 2.87 8.17 6.84 9.5.5.08.66-.23.66-.5v-1.69c-2.77.6-3.36-1.34-3.36-1.34-.46-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.6.07-.6 1 .07 1.53 1.03 1.53 1.03.87 1.52 2.34 1.07 2.91.83.1-.65.35-1.09.63-1.34-2.22-.25-4.55-1.11-4.55-4.92 0-1.11.38-2 1.03-2.71-.1-.25-.45-1.29.1-2.64 0 0 .84-.27 2.75 1.02.79-.22 1.65-.33 2.5-.33.85 0 1.71.11 2.5.33 1.91-1.29 2.75-1.02 2.75-1.02.55 1.35.2 2.39.1 2.64.65.71 1.03 1.6 1.03 2.71 0 3.82-2.34 4.66-4.57 4.91.36.31.69.92.69 1.85V21c0 .27.16.59.67.5C19.14 20.16 22 16.42 22 12A10 10 0 0 0 12 2z" />
+                </svg>
+              </div>
+              <span class="scanner-label" id="scannerStatusText">Tap to Scan Biometrics</span>
+            </div>
+
+            <!-- Login / Signup Selector -->
+            <div class="auth-tabs">
+              <button type="button" class="auth-tab-btn active" id="tabLogin" onclick="switchAuthMode('login')">TERMINAL
+                LOGIN</button>
+              <button type="button" class="auth-tab-btn" id="tabSignup" onclick="switchAuthMode('signup')">REQUEST
+                CLEARANCE</button>
+            </div>
+
+            <!-- Auth Form -->
+            <form id="authForm" onsubmit="handleAuthSubmit(event)">
+              <div class="form-group">
+                <label class="form-label" id="userIdLabel">Operator Call-Sign / ID</label>
+                <div class="form-input-wrap">
+                  <input type="text" class="form-input" id="authIdentifier" placeholder="CYBER-BEAM-01"
+                    value="OPERATOR-DELTA" required />
+                  <i data-lucide="user"></i>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Quantum Key / Access Passphrase</label>
+                <div class="form-input-wrap">
+                  <input type="password" class="form-input" id="authPassword" placeholder="••••••••••••"
+                    value="cipherbeam2026" required />
+                  <i data-lucide="shield-check"></i>
+                </div>
+              </div>
+
+              <div class="form-group" id="signupFields" style="display: none;">
+                <label class="form-label">Optical Station Node</label>
+                <div class="form-input-wrap">
+                  <input type="text" class="form-input" id="authStation" placeholder="ESP32-STATION-ALPHA"
+                    value="ESP32-OPTICAL-01" />
+                  <i data-lucide="radio"></i>
+                </div>
+              </div>
+
+              <button type="submit" class="btn-primary-auth" id="authSubmitBtn">
+                <i data-lucide="key"></i>
+                <span id="authBtnText">INITIALIZE SECURE SESSION</span>
+              </button>
+            </form>
           </div>
         </div>
 
-        <div class="form-group" id="signupFields" style="display: none;">
-          <label class="form-label">Optical Station Node</label>
-          <div class="form-input-wrap">
-            <input type="text" class="form-input" id="authStation" placeholder="ESP32-STATION-ALPHA" value="ESP32-OPTICAL-01" />
-            <i data-lucide="radio"></i>
+        <!-- ================= RIGHT 3D WINDOW: OPTICAL NETWORK TOPOLOGY ================= -->
+        <div class="auth-window auth-window-right" id="windowNodes" onclick="focus3DWindow('right')">
+          <div class="hud-corner-tl"></div>
+          <div class="hud-corner-tr"></div>
+          <div class="hud-corner-bl"></div>
+          <div class="hud-corner-br"></div>
+
+          <div class="auth-window-header">
+            <div class="window-title-wrap">
+              <span class="window-status-beacon pulse-cyan"></span>
+              <span class="window-title">OPTICAL TOPOLOGY // NODES</span>
+            </div>
+            <div class="window-controls">
+              <button type="button" class="win-btn win-min" title="Minimize/Dock"
+                onclick="toggle3DWindow(event, 'right')">—</button>
+              <button type="button" class="win-btn win-max" title="Bring to Focus"
+                onclick="expand3DWindow(event, 'right')">□</button>
+              <button type="button" class="win-btn win-close" title="Dismiss"
+                onclick="toggle3DWindow(event, 'right')">✕</button>
+            </div>
+          </div>
+
+          <div class="window-body">
+            <!-- Animated Optical Orbit Radar Graphic -->
+            <div class="orbit-radar-container">
+              <svg class="radar-svg" viewBox="0 0 240 130">
+                <defs>
+                  <linearGradient id="beamGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.85" />
+                    <stop offset="50%" stop-color="#06b6d4" stop-opacity="1" />
+                    <stop offset="100%" stop-color="#8b5cf6" stop-opacity="0.85" />
+                  </linearGradient>
+                  <radialGradient id="centerGlow" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stop-color="#10b981" stop-opacity="0.45" />
+                    <stop offset="100%" stop-color="#10b981" stop-opacity="0" />
+                  </radialGradient>
+                </defs>
+                <!-- Radar grid & rings -->
+                <circle cx="120" cy="65" r="55" fill="none" stroke="rgba(6,182,212,0.25)" stroke-dasharray="3,3" />
+                <circle cx="120" cy="65" r="38" fill="none" stroke="rgba(16,185,129,0.3)" />
+                <circle cx="120" cy="65" r="20" fill="url(#centerGlow)" />
+                <!-- Laser rays -->
+                <line x1="120" y1="65" x2="45" y2="35" stroke="url(#beamGrad)" stroke-width="1.6"
+                  class="laser-ray-animated" />
+                <line x1="120" y1="65" x2="195" y2="40" stroke="url(#beamGrad)" stroke-width="1.6"
+                  class="laser-ray-animated-2" />
+                <line x1="120" y1="65" x2="135" y2="110" stroke="url(#beamGrad)" stroke-width="1.6"
+                  class="laser-ray-animated-3" />
+                <!-- Central Optical Transceiver -->
+                <circle cx="120" cy="65" r="6" fill="#10b981" stroke="#ffffff" stroke-width="1.5" />
+                <circle cx="120" cy="65" r="12" fill="none" stroke="#10b981" class="radar-ping-ring" />
+                <!-- Satellite Nodes -->
+                <g class="orbit-node node-1">
+                  <circle cx="45" cy="35" r="4.5" fill="#06b6d4" />
+                  <text x="45" y="24" text-anchor="middle" fill="#06b6d4" font-size="8"
+                    font-family="JetBrains Mono">ORB-04</text>
+                </g>
+                <g class="orbit-node node-2">
+                  <circle cx="195" cy="40" r="4.5" fill="#10b981" />
+                  <text x="195" y="29" text-anchor="middle" fill="#10b981" font-size="8"
+                    font-family="JetBrains Mono">STATION-A</text>
+                </g>
+                <g class="orbit-node node-3">
+                  <circle cx="135" cy="110" r="4.5" fill="#8b5cf6" />
+                  <text x="135" y="123" text-anchor="middle" fill="#8b5cf6" font-size="8"
+                    font-family="JetBrains Mono">RELAY-09</text>
+                </g>
+              </svg>
+            </div>
+
+            <!-- Optical Link Status Nodes -->
+            <div class="node-list">
+              <div class="node-item">
+                <div class="node-info">
+                  <span class="node-status-dot online"></span>
+                  <div>
+                    <div class="node-name">ORBITAL RELAY DELTA-4</div>
+                    <div class="node-spec">FSO LASER LINK // 10 Gbps</div>
+                  </div>
+                </div>
+                <div class="node-ping text-primary">1.2ms</div>
+              </div>
+
+              <div class="node-item">
+                <div class="node-info">
+                  <span class="node-status-dot online"></span>
+                  <div>
+                    <div class="node-name">ALPHA GROUND RECEIVER</div>
+                    <div class="node-spec">ATMOSPHERIC ADAPTIVE OPTICS</div>
+                  </div>
+                </div>
+                <div class="node-ping text-cyan">0.4ms</div>
+              </div>
+
+              <div class="node-item">
+                <div class="node-info">
+                  <span class="node-status-dot tracking"></span>
+                  <div>
+                    <div class="node-name">QUANTUM TRANSCEIVER 9</div>
+                    <div class="node-spec">AZ/EL GIMBAL: LOCKED 99.4%</div>
+                  </div>
+                </div>
+                <div class="node-ping text-violet">2.8ms</div>
+              </div>
+            </div>
+
+            <div class="window-footer-hint">
+              <i data-lucide="radio"></i>
+              <span>OPTICAL BEAM STEERING: ACTIVE TRACKING</span>
+            </div>
           </div>
         </div>
 
-        <button type="submit" class="btn-primary-auth" id="authSubmitBtn">
-          <i data-lucide="key"></i>
-          <span id="authBtnText">INITIALIZE SECURE SESSION</span>
-        </button>
-      </form>
+      </div> <!-- /auth-3d-stage -->
+    </div> <!-- /auth-3d-viewport -->
+
+    <!-- Mobile / Quick 3D Window Switcher Dock -->
+    <div class="auth-3d-dock">
+      <button type="button" class="dock-btn" id="dockBtnLeft" onclick="focus3DWindow('left')">
+        <span class="dock-icon">📡</span>
+        <span>QKD Telemetry</span>
+      </button>
+      <button type="button" class="dock-btn active" id="dockBtnCenter" onclick="focus3DWindow('center')">
+        <span class="dock-icon">🔐</span>
+        <span>Login Console</span>
+      </button>
+      <button type="button" class="dock-btn" id="dockBtnRight" onclick="focus3DWindow('right')">
+        <span class="dock-icon">🌐</span>
+        <span>Optical Nodes</span>
+      </button>
     </div>
   </div>
 
   <!-- =======================================================
-       2. MAIN CIPHERBEAM UI APPLICATION (Matches Reference Image)
+       2. MAIN CIPHERBEAM UI APPLICATION
        ======================================================= -->
   <div class="app-container">
     <div class="terminal-hud-frame">
@@ -101,10 +416,34 @@
       <!-- Top Header Bar -->
       <header class="header-bar">
         <div class="header-brand">
-          <div class="brand-title">
-            <span class="brand-title-accent">CIPHERBEAM</span> AI
+          <div class="cipher-logo-emblem compact" title="CipherBeam AI Quantum Core">
+            <div class="logo-3d-rig">
+              <svg class="logo-gyro-ring ring-outer" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="45" fill="none" stroke="rgba(16, 185, 129, 0.6)" stroke-width="2"
+                  stroke-dasharray="6, 4" />
+                <line x1="50" y1="2" x2="50" y2="8" stroke="#10b981" stroke-width="2.5" />
+                <circle cx="50" cy="4" r="2.5" fill="#34d399" />
+              </svg>
+              <svg class="logo-gyro-ring ring-inner" viewBox="0 0 100 100">
+                <circle cx="50" cy="50" r="32" fill="none" stroke="rgba(6, 182, 212, 0.6)" stroke-width="2"
+                  stroke-dasharray="10, 4" />
+              </svg>
+              <div class="logo-prism-core">
+                <svg class="prism-svg" viewBox="0 0 80 80">
+                  <polygon points="40,18 60,30 40,38 20,30" fill="#ffffff" opacity="0.95" />
+                  <polygon points="20,30 40,38 40,62 20,50" fill="#10b981" opacity="0.85" />
+                  <polygon points="40,38 60,30 60,50 40,62" fill="#06b6d4" opacity="0.85" />
+                  <circle cx="40" cy="38" r="3" fill="#ffffff" />
+                </svg>
+              </div>
+            </div>
           </div>
-          <div class="brand-subtitle">SECURE OPTICAL COMMUNICATION</div>
+          <div class="brand-title-group">
+            <div class="brand-title">
+              <span class="brand-title-accent">CIPHERBEAM</span> AI
+            </div>
+            <div class="brand-subtitle">SECURE OPTICAL COMMUNICATION</div>
+          </div>
         </div>
 
         <div class="header-status-area">
@@ -114,11 +453,14 @@
           </div>
 
           <div class="header-controls">
-            <a href="CipherBeam_AI_UI.zip" download="CipherBeam_AI_UI.zip" class="icon-btn-subtle" style="text-decoration: none; border-color: rgba(16, 185, 129, 0.4); color: var(--primary);" title="Download Complete Project ZIP">
+            <a href="CipherBeam_AI_UI.zip" download="CipherBeam_AI_UI.zip" class="icon-btn-subtle"
+              style="text-decoration: none; border-color: rgba(16, 185, 129, 0.4); color: var(--primary);"
+              title="Download Complete Project ZIP">
               <i data-lucide="download"></i>
               <span>DOWNLOAD ZIP</span>
             </a>
-            <button class="icon-btn-subtle" id="audioToggleBtn" title="Toggle cyber sound synthesizer" onclick="toggleAudioFx()">
+            <button class="icon-btn-subtle" id="audioToggleBtn" title="Toggle cyber sound synthesizer"
+              onclick="toggleAudioFx()">
               <i data-lucide="volume-2" id="audioIcon"></i>
               <span id="audioLabel">AUDIO ON</span>
             </button>
@@ -189,7 +531,7 @@
 
         <!-- Right Column: TRANSMISSION CONTROL & Content Views -->
         <main class="main-content-panel">
-          
+
           <!-- ================= TAB 1: COMPOSE / TRANSMISSION CONTROL (REFERENCE LAYOUT) ================= -->
           <div class="tab-view active" id="tabView-compose">
             <div class="section-header-title">
@@ -201,12 +543,8 @@
               <label class="control-label" for="messageInput">Message</label>
               <div class="bracket-message-card">
                 <span class="bracket-marker-tl">[</span>
-                <textarea 
-                  id="messageInput" 
-                  class="message-textarea" 
-                  placeholder="Type your message here..."
-                  oninput="updateMessageTelemetry()"
-                >SECURE PAYLOAD // CIPHERBEAM OPTICAL LINK: Node 0x4B handshake confirmed. AES-256 session key exchanged via Quantum Photonic Channel.</textarea>
+                <textarea id="messageInput" class="message-textarea" placeholder="Type your message here..."
+                  oninput="updateMessageTelemetry()">SECURE PAYLOAD // CIPHERBEAM OPTICAL LINK: Node 0x4B handshake confirmed. AES-256 session key exchanged via Quantum Photonic Channel.</textarea>
                 <span class="bracket-marker-br">]</span>
 
                 <div class="textarea-footer-telemetry">
@@ -253,14 +591,17 @@
                 <span class="badge-tag badge-emerald" id="activeCipherTag">AES-256-GCM AUTHENTICATED</span>
               </div>
               <div class="hex-stream-viewer" id="hexStreamViewer">
-                0x7f4e91bc 0xaa28c031 0x5109b8d2 0x93ef1802 0x8b32cf09 0x6e8812c4 0x110298ea 0x3344cc90 0x8901fab2 0x4422dd88 [IV: e9f821c90a1] [TAG: 9c0182af34]
+                0x7f4e91bc 0xaa28c031 0x5109b8d2 0x93ef1802 0x8b32cf09 0x6e8812c4 0x110298ea 0x3344cc90 0x8901fab2
+                0x4422dd88 [IV: e9f821c90a1] [TAG: 9c0182af34]
               </div>
-              <div style="font-size: 0.72rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+              <div
+                style="font-size: 0.72rem; color: var(--text-dim); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
                 <div style="display: flex; gap: 1rem;">
                   <span>SHA-256 Digest: <span id="shaDigest">8f4c...91b2</span></span>
                   <span>Photon Entropy: <span style="color: var(--primary);">99.94%</span></span>
                 </div>
-                <button class="icon-btn-subtle" style="font-size: 0.72rem; padding: 0.3rem 0.6rem;" onclick="downloadEncryptedPayload()">
+                <button class="icon-btn-subtle" style="font-size: 0.72rem; padding: 0.3rem 0.6rem;"
+                  onclick="downloadEncryptedPayload()">
                   <i data-lucide="file-down"></i>
                   <span>DOWNLOAD PAYLOAD (.JSON)</span>
                 </button>
@@ -353,7 +694,8 @@
             <div class="hud-stat-box">
               <span class="hud-stat-title">QUANTUM ENTROPY HARVESTER</span>
               <div style="font-size: 0.85rem; color: var(--text-main); margin-top: 0.25rem;">
-                Entropy Source: ESP32 Optical Thermal Noise & Photonic Fluctuation. Live Seed: <code style="color: var(--primary);">0x9A44F128E73B901C</code>
+                Entropy Source: ESP32 Optical Thermal Noise & Photonic Fluctuation. Live Seed: <code
+                  style="color: var(--primary);">0x9A44F128E73B901C</code>
               </div>
             </div>
           </div>
@@ -398,7 +740,8 @@
               <div class="toggle-switch-wrap">
                 <div>
                   <div style="font-weight: 600; font-size: 0.9rem;">ESP32 Hardware Baud Rate</div>
-                  <div style="font-size: 0.75rem; color: var(--text-dim);">Set serial baud rate for optical transceiver</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Set serial baud rate for optical transceiver
+                  </div>
                 </div>
                 <select class="bracket-select" style="width: 140px; padding: 0.4rem 0.8rem; font-size: 0.8rem;">
                   <option>921600 baud</option>
@@ -421,7 +764,8 @@
               <div class="toggle-switch-wrap">
                 <div>
                   <div style="font-weight: 600; font-size: 0.9rem;">Quantum Noise Randomizer</div>
-                  <div style="font-size: 0.75rem; color: var(--text-dim);">Inject true hardware entropy into key seeds</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Inject true hardware entropy into key seeds
+                  </div>
                 </div>
                 <label class="switch">
                   <input type="checkbox" checked />
@@ -432,7 +776,8 @@
               <div class="toggle-switch-wrap">
                 <div>
                   <div style="font-weight: 600; font-size: 0.9rem;">Audio Synthesis Sound FX</div>
-                  <div style="font-size: 0.75rem; color: var(--text-dim);">Soothing sci-fi tactile feedback soundscape</div>
+                  <div style="font-size: 0.75rem; color: var(--text-dim);">Soothing sci-fi tactile feedback soundscape
+                  </div>
                 </div>
                 <label class="switch">
                   <input type="checkbox" id="settingsAudioToggle" checked onchange="toggleAudioFx()" />
@@ -511,13 +856,15 @@
         <div class="progress-bar-fill" id="transmissionProgressBar"></div>
       </div>
 
-      <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
+      <div
+        style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
         <span id="transmissionProgressLabel">Modulating 850nm Photons...</span>
         <span id="transmissionProgressPct">0%</span>
       </div>
 
       <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
-        <button class="btn-cyber-encrypt" id="closeModalBtn" style="display: none; padding: 0.5rem 1.2rem; font-size: 0.8rem;" onclick="closeTransmissionModal()">
+        <button class="btn-cyber-encrypt" id="closeModalBtn"
+          style="display: none; padding: 0.5rem 1.2rem; font-size: 0.8rem;" onclick="closeTransmissionModal()">
           CONFIRM & CLOSE
         </button>
       </div>
@@ -537,4 +884,5 @@
     lucide.createIcons();
   </script>
 </body>
+
 </html>
