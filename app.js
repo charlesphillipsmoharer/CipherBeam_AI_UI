@@ -1,5 +1,3 @@
-//WoW//
-
 let audioCtx = null;
 let soundEnabled = true;
 
@@ -525,124 +523,385 @@ function handleEncryptAction(event) {
 // 5. OPTICAL BEAM TRANSMISSION SIMULATOR & CANVAS
 // ========================================================
 let totalPacketsTransmitted = 1482;
+let laserSpoolNodes = null;
+let transmitInterval = null;
+let beamAnimId = null;
+
+// Audio Synthesizer: Continuous High-Energy Laser Spool-Up
+function startLaserSpoolAudio() {
+  if (!soundEnabled) return;
+  try {
+    initAudio();
+    if (!audioCtx) return;
+    if (audioCtx.state === 'suspended') audioCtx.resume();
+
+    const now = audioCtx.currentTime;
+    const osc = audioCtx.createOscillator();
+    const subOsc = audioCtx.createOscillator();
+    const filter = audioCtx.createBiquadFilter();
+    const gain = audioCtx.createGain();
+
+    // Primary charging laser whine: 140Hz ramped up exponentially to 1100Hz
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(140, now);
+    osc.frequency.exponentialRampToValueAtTime(1100, now + 2.5);
+
+    // Deep sub-harmonic hum: 70Hz ramped to 220Hz
+    subOsc.type = 'sine';
+    subOsc.frequency.setValueAtTime(70, now);
+    subOsc.frequency.linearRampToValueAtTime(220, now + 2.5);
+
+    // Resonant lowpass filter sweeping open
+    filter.type = 'lowpass';
+    filter.Q.value = 3.5;
+    filter.frequency.setValueAtTime(350, now);
+    filter.frequency.exponentialRampToValueAtTime(2800, now + 2.5);
+
+    // Gain envelope
+    gain.gain.setValueAtTime(0.001, now);
+    gain.gain.linearRampToValueAtTime(0.05, now + 0.2);
+    gain.gain.setValueAtTime(0.05, now + 2.4);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 2.9);
+
+    osc.connect(filter);
+    subOsc.connect(filter);
+    filter.connect(gain);
+    gain.connect(audioCtx.destination);
+
+    osc.start(now);
+    subOsc.start(now);
+    osc.stop(now + 2.9);
+    subOsc.stop(now + 2.9);
+
+    laserSpoolNodes = { osc, subOsc, gain };
+  } catch (e) {
+    console.warn('Audio spool exception', e);
+  }
+}
+
+function stopLaserSpoolAudio() {
+  if (laserSpoolNodes && audioCtx) {
+    try {
+      const now = audioCtx.currentTime;
+      laserSpoolNodes.gain.gain.cancelScheduledValues(now);
+      laserSpoolNodes.gain.gain.setValueAtTime(laserSpoolNodes.gain.gain.value, now);
+      laserSpoolNodes.gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.1);
+      setTimeout(() => {
+        try {
+          laserSpoolNodes.osc.stop();
+          laserSpoolNodes.subOsc.stop();
+        } catch (_) {}
+        laserSpoolNodes = null;
+      }, 110);
+    } catch (_) {
+      laserSpoolNodes = null;
+    }
+  }
+}
+
+// Interactive 3D Inspection: Parallax Tilt on Cursor Move
+function setupChamber3DInspection() {
+  const viewport = document.getElementById('chamberViewport') || document.getElementById('opticalModal');
+  const chassis = document.getElementById('chamberChassis');
+  if (!viewport || !chassis) return;
+
+  viewport.onmousemove = (e) => {
+    const rect = viewport.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5; // -0.5 to 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5; // -0.5 to 0.5
+
+    const rotY = (x * 24).toFixed(2);  // up to ±12 degrees
+    const rotX = (-y * 18).toFixed(2); // up to ±9 degrees
+    chassis.style.transform = `rotateX(${rotX}deg) rotateY(${rotY}deg)`;
+  };
+
+  viewport.onmouseleave = () => {
+    chassis.style.transform = 'rotateX(0deg) rotateY(0deg)';
+  };
+}
+
+function resetChamber3DInspection() {
+  const viewport = document.getElementById('chamberViewport') || document.getElementById('opticalModal');
+  const chassis = document.getElementById('chamberChassis');
+  if (viewport) {
+    viewport.onmousemove = null;
+    viewport.onmouseleave = null;
+  }
+  if (chassis) {
+    chassis.style.transform = '';
+  }
+}
 
 function handleTransmitAction(event) {
   createButtonRipple(event);
   playCyberTone('transmit');
+  startLaserSpoolAudio();
 
   const modal = document.getElementById('opticalModal');
   const progressBar = document.getElementById('transmissionProgressBar');
   const progressPct = document.getElementById('transmissionProgressPct');
   const progressLabel = document.getElementById('transmissionProgressLabel');
   const closeModalBtn = document.getElementById('closeModalBtn');
+  const hexStream = document.getElementById('modalHexStream');
+  const flare = document.getElementById('targetCollisionFlare');
+  const cells = document.querySelectorAll('#chargeCellsGrid .cell');
 
   if (modal) modal.classList.add('active');
   if (closeModalBtn) closeModalBtn.style.display = 'none';
+  if (flare) flare.classList.remove('active');
+
+  // Reset charge cells
+  cells.forEach(c => c.classList.remove('lit'));
+
+  // Enable 3D Parallax Inspection
+  setupChamber3DInspection();
 
   let progress = 0;
-  progressBar.style.width = '0%';
-  progressPct.textContent = '0%';
-  progressLabel.textContent = 'Aligning 850nm Laser Diode with Photodetector...';
+  if (progressBar) progressBar.style.width = '0%';
+  if (progressPct) progressPct.textContent = '0%';
+  if (progressLabel) {
+    progressLabel.textContent = 'Engaging 850nm Photonic Laser Diode & Magnetic Guide...';
+    progressLabel.style.color = '';
+  }
 
-  // Start animated beam particle canvas
+  // Start Particle Accelerator Beam Canvas
   startOpticalBeamCanvas();
 
-  const transmitInterval = setInterval(() => {
+  if (transmitInterval) clearInterval(transmitInterval);
+
+  transmitInterval = setInterval(() => {
     progress += Math.floor(Math.random() * 8) + 4;
     if (progress > 100) progress = 100;
 
-    progressBar.style.width = `${progress}%`;
-    progressPct.textContent = `${progress}%`;
+    if (progressBar) progressBar.style.width = `${progress}%`;
+    if (progressPct) progressPct.textContent = `${progress}%`;
 
-    if (progress > 25 && progress <= 60) {
-      progressLabel.textContent = 'Streaming Encrypted Photons over Optical Waveguide...';
-    } else if (progress > 60 && progress < 100) {
-      progressLabel.textContent = 'ESP32 Hardware Buffer Receiving & Verifying CRC32...';
+    // 20-Segment LED Power Bar progression
+    const litCount = Math.floor((progress / 100) * cells.length);
+    cells.forEach((cell, idx) => {
+      if (idx < litCount) {
+        cell.classList.add('lit');
+      } else {
+        cell.classList.remove('lit');
+      }
+    });
+
+    // Scramble Hex stream packet readout
+    if (hexStream) {
+      if (progress < 100) {
+        const h1 = Math.floor(Math.random() * 0xFFFFFFFF).toString(16).toUpperCase().padStart(8, '0');
+        const h2 = Math.floor(Math.random() * 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+        const frameNum = String(Math.floor(progress / 5) + 1).padStart(2, '0');
+        hexStream.textContent = `0x${h1} :: FRAME_${frameNum} [0x${h2}]`;
+      } else {
+        hexStream.textContent = '0x00FF88A1 :: ACK-RECEIVED [CRC32-OK // 0-JITTER]';
+      }
+    }
+
+    // Activate receiver collision flare once beam stream reaches target
+    if (flare && progress >= 28) {
+      flare.classList.add('active');
+    }
+
+    if (progress > 20 && progress <= 55) {
+      if (progressLabel) progressLabel.textContent = 'Streaming Encrypted Photons through 3D Waveguide Coils...';
+    } else if (progress > 55 && progress < 100) {
+      if (progressLabel) progressLabel.textContent = 'ESP32 Hardware Buffer Ingestion & CRC32 Verification...';
     } else if (progress >= 100) {
       clearInterval(transmitInterval);
-      progressLabel.textContent = '✓ TRANSMISSION COMPLETE: Acknowledgment Received by ESP32 (0ms Jitter)';
-      progressLabel.style.color = 'var(--primary)';
-      if (closeModalBtn) closeModalBtn.style.display = 'inline-block';
+      transmitInterval = null;
+
+      if (progressLabel) {
+        progressLabel.textContent = '✓ TRANSMISSION COMPLETE: Acknowledgment Received by ESP32 (0ms Jitter)';
+        progressLabel.style.color = 'var(--primary)';
+      }
+      if (closeModalBtn) closeModalBtn.style.display = 'inline-flex';
       playCyberTone('auth-success');
 
-      totalPacketsTransmitted += parseInt(packetCount ? packetCount.textContent : '2');
+      totalPacketsTransmitted += parseInt(typeof packetCount !== 'undefined' && packetCount ? packetCount.textContent : '2');
       const analyticsPacketTotal = document.getElementById('analyticsPacketTotal');
       if (analyticsPacketTotal) {
         analyticsPacketTotal.textContent = totalPacketsTransmitted.toLocaleString();
       }
       showToast('Optical Photon Stream Delivered to ESP32 Node');
     }
-  }, 120);
+  }, 110);
 }
 
 function closeTransmissionModal() {
   playCyberTone('click');
+  stopLaserSpoolAudio();
+
+  if (transmitInterval) {
+    clearInterval(transmitInterval);
+    transmitInterval = null;
+  }
+
   const modal = document.getElementById('opticalModal');
   if (modal) modal.classList.remove('active');
+
+  if (beamAnimId) {
+    cancelAnimationFrame(beamAnimId);
+    beamAnimId = null;
+  }
+
+  const flare = document.getElementById('targetCollisionFlare');
+  if (flare) flare.classList.remove('active');
+
+  const cells = document.querySelectorAll('#chargeCellsGrid .cell');
+  cells.forEach(c => c.classList.remove('lit'));
+
+  resetChamber3DInspection();
 }
 
-// Particle Beam Canvas Renderer
-let beamAnimId = null;
+// Particle Beam Canvas Renderer with Coherent Laser Core & Collision Sparks
 function startOpticalBeamCanvas() {
   const canvas = document.getElementById('opticalBeamCanvas');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  canvas.width = canvas.parentElement.clientWidth;
-  canvas.height = canvas.parentElement.clientHeight;
+  canvas.width = canvas.parentElement.clientWidth || 600;
+  canvas.height = canvas.parentElement.clientHeight || 70;
 
   const particles = [];
-  for (let i = 0; i < 45; i++) {
+  const particleCount = 55;
+  for (let i = 0; i < particleCount; i++) {
     particles.push({
       x: Math.random() * canvas.width,
-      y: canvas.height / 2 + (Math.random() - 0.5) * 20,
-      size: Math.random() * 3.5 + 1.5,
-      speed: Math.random() * 7 + 5,
-      color: Math.random() > 0.5 ? '#10b981' : '#06b6d4'
+      y: canvas.height / 2 + (Math.random() - 0.5) * 16,
+      size: Math.random() * 2.5 + 1.2,
+      length: Math.random() * 24 + 10,
+      speed: Math.random() * 9 + 8,
+      hue: Math.random() > 0.4 ? '#06b6d4' : (Math.random() > 0.5 ? '#10b981' : '#a855f7')
     });
   }
 
-  function render() {
-    ctx.fillStyle = 'rgba(4, 8, 16, 0.3)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+  // Spark burst particles upon collision at the photodiode receiver
+  const sparks = [];
+  function emitSparks(rxX, rxY) {
+    for (let i = 0; i < 4; i++) {
+      const angle = (Math.PI * 0.5) + (Math.random() - 0.5) * Math.PI;
+      sparks.push({
+        x: rxX,
+        y: rxY,
+        vx: Math.cos(angle) * (Math.random() * 5 + 2),
+        vy: Math.sin(angle) * (Math.random() * 5 - 2.5),
+        life: 1.0,
+        decay: Math.random() * 0.08 + 0.04,
+        size: Math.random() * 2.5 + 1,
+        color: Math.random() > 0.5 ? '#06b6d4' : '#10b981'
+      });
+    }
+  }
 
-    // Center laser beam line
+  let frameTick = 0;
+
+  function render() {
+    frameTick++;
+    const w = canvas.width;
+    const h = canvas.height;
+    const centerY = h / 2;
+
+    // Semi-transparent fade for motion trails
+    ctx.fillStyle = 'rgba(3, 8, 18, 0.28)';
+    ctx.fillRect(0, 0, w, h);
+
+    // 1. Broad Outer Laser Glow
     ctx.beginPath();
-    ctx.moveTo(0, canvas.height / 2);
-    ctx.lineTo(canvas.width, canvas.height / 2);
-    ctx.strokeStyle = 'rgba(6, 182, 212, 0.6)';
-    ctx.lineWidth = 3;
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = '#06b6d4';
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(w, centerY);
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.2)';
+    ctx.lineWidth = 16;
     ctx.stroke();
 
-    // Central primary beam
+    // 2. Energetic Focused Mid-Core
     ctx.beginPath();
-    ctx.moveTo(0, canvas.height / 2);
-    ctx.lineTo(canvas.width, canvas.height / 2);
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(w, centerY);
+    ctx.strokeStyle = 'rgba(16, 185, 129, 0.65)';
+    ctx.lineWidth = 4.5;
+    ctx.shadowBlur = 14;
+    ctx.shadowColor = '#10b981';
+    ctx.stroke();
+
+    // 3. Hot White Center Filament
+    ctx.beginPath();
+    ctx.moveTo(0, centerY);
+    ctx.lineTo(w, centerY);
     ctx.strokeStyle = '#ffffff';
-    ctx.lineWidth = 1;
+    ctx.lineWidth = 1.6;
     ctx.shadowBlur = 6;
     ctx.shadowColor = '#ffffff';
     ctx.stroke();
     ctx.shadowBlur = 0;
 
-    // Render photon particles
+    // 4. Oscillating High-Frequency Plasma Lightning Arcs
+    const t = frameTick * 0.12;
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 15) {
+      const arcY = centerY + Math.sin(x * 0.035 + t * 3) * 6 * Math.sin(x * 0.015);
+      if (x === 0) ctx.moveTo(x, arcY);
+      else ctx.lineTo(x, arcY);
+    }
+    ctx.strokeStyle = 'rgba(6, 182, 212, 0.8)';
+    ctx.lineWidth = 1.2;
+    ctx.stroke();
+
+    ctx.beginPath();
+    for (let x = 0; x <= w; x += 15) {
+      const arcY2 = centerY + Math.cos(x * 0.045 - t * 2.5) * 5.5 * Math.cos(x * 0.02);
+      if (x === 0) ctx.moveTo(x, arcY2);
+      else ctx.lineTo(x, arcY2);
+    }
+    ctx.strokeStyle = 'rgba(168, 85, 247, 0.75)';
+    ctx.lineWidth = 1.0;
+    ctx.stroke();
+
+    // 5. Streaming Photon Streaks
     particles.forEach(p => {
       p.x += p.speed;
-      if (p.x > canvas.width) {
+      if (p.x > w - 10) {
+        emitSparks(w - 10, centerY);
         p.x = 0;
-        p.y = canvas.height / 2 + (Math.random() - 0.5) * 24;
+        p.y = centerY + (Math.random() - 0.5) * 16;
       }
 
       ctx.beginPath();
-      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-      ctx.fillStyle = p.color;
-      ctx.shadowBlur = 10;
-      ctx.shadowColor = p.color;
-      ctx.fill();
+      ctx.moveTo(Math.max(0, p.x - p.length), p.y);
+      ctx.lineTo(p.x, p.y);
+      ctx.strokeStyle = p.hue;
+      ctx.lineWidth = p.size;
+      ctx.shadowBlur = 8;
+      ctx.shadowColor = p.hue;
+      ctx.stroke();
       ctx.shadowBlur = 0;
+
+      // Particle bright head
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size * 0.8, 0, Math.PI * 2);
+      ctx.fillStyle = '#ffffff';
+      ctx.fill();
     });
+
+    // 6. Impact sparks on the right receiver
+    for (let i = sparks.length - 1; i >= 0; i--) {
+      const s = sparks[i];
+      s.x += s.vx;
+      s.y += s.vy;
+      s.life -= s.decay;
+
+      if (s.life <= 0) {
+        sparks.splice(i, 1);
+        continue;
+      }
+
+      ctx.beginPath();
+      ctx.arc(s.x, s.y, s.size * s.life, 0, Math.PI * 2);
+      ctx.fillStyle = s.color;
+      ctx.globalAlpha = s.life;
+      ctx.fill();
+      ctx.globalAlpha = 1.0;
+    }
 
     beamAnimId = requestAnimationFrame(render);
   }
@@ -1094,5 +1353,22 @@ window.addEventListener('DOMContentLoaded', () => {
   initMatrixRain();
   if (window.lucide) {
     lucide.createIcons();
+  }
+});
+
+// Global keyboard shortcuts & modal backdrop dismiss
+window.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const modal = document.getElementById('opticalModal');
+    if (modal && modal.classList.contains('active')) {
+      closeTransmissionModal();
+    }
+  }
+});
+
+window.addEventListener('click', (e) => {
+  const modal = document.getElementById('opticalModal');
+  if (modal && e.target === modal && modal.classList.contains('active')) {
+    closeTransmissionModal();
   }
 });

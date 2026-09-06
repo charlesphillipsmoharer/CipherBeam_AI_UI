@@ -1000,38 +1000,132 @@ ESTIMATED QBER: 0.042% [THRESHOLD: &lt;5%]</pre>
        3. INTERACTIVE OPTICAL BEAM TRANSMISSION SIMULATOR MODAL
        ======================================================= -->
   <div class="optical-transmission-modal" id="opticalModal">
-    <div class="transmission-card">
-      <div class="hud-corner-tl"></div>
-      <div class="hud-corner-tr"></div>
-      <div class="hud-corner-bl"></div>
-      <div class="hud-corner-br"></div>
+    <div class="chamber-3d-viewport" id="chamberViewport">
+      <div class="chamber-chassis" id="chamberChassis">
+        <!-- Sci-Fi Corner Brackets -->
+        <div class="hud-corner-tl"></div>
+        <div class="hud-corner-tr"></div>
+        <div class="hud-corner-bl"></div>
+        <div class="hud-corner-br"></div>
 
-      <div style="display: flex; justify-content: space-between; align-items: center;">
-        <div class="brand-title" style="font-size: 1.1rem;">
-          <span class="brand-title-accent">OPTICAL BEAM</span> TRANSMISSION IN PROGRESS
+        <!-- LAYER 1: Recessed Backplate & Heat Sink Grid (translateZ: -35px) -->
+        <div class="chamber-layer-backplate">
+          <div class="hazard-stripe-bar top"></div>
+          <div class="carbon-hex-grid"></div>
+          <div class="cooling-vent-glow"></div>
+          <div class="hazard-stripe-bar bottom"></div>
         </div>
-        <span class="badge-tag badge-cyan" id="transmissionCipherBadge">AES-256-GCM</span>
-      </div>
 
-      <div class="beam-canvas-container">
-        <canvas id="opticalBeamCanvas"></canvas>
-      </div>
+        <!-- LAYER 2: Physical Optical Waveguide Core (translateZ: 0px) -->
+        <div class="chamber-layer-waveguide">
+          <!-- Left Laser Transmitter Cannon Head -->
+          <div class="hardware-station emitter-tx">
+            <div class="station-housing">
+              <div class="station-badge">TX // 850nm</div>
+              <div class="emitter-nozzle">
+                <div class="lens-glow"></div>
+                <div class="concentric-emitter-ring ring-1"></div>
+                <div class="concentric-emitter-ring ring-2"></div>
+              </div>
+              <div class="station-spec">FSO LASER DIODE</div>
+            </div>
+          </div>
 
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="transmissionProgressBar"></div>
-      </div>
+          <!-- Central Optical Accelerator Tube & 3D Confinement Coils -->
+          <div class="waveguide-center-tube">
+            <!-- 3D Rotating Confinement Coils in Perspective Space -->
+            <div class="confinement-coils-rig">
+              <div class="magnetic-coil coil-1"><span class="coil-arc"></span></div>
+              <div class="magnetic-coil coil-2"><span class="coil-arc"></span></div>
+              <div class="magnetic-coil coil-3"><span class="coil-arc"></span></div>
+              <div class="magnetic-coil coil-4"><span class="coil-arc"></span></div>
+            </div>
 
-      <div
-        style="display: flex; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); margin-top: 0.5rem;">
-        <span id="transmissionProgressLabel">Modulating 850nm Photons...</span>
-        <span id="transmissionProgressPct">0%</span>
-      </div>
+            <!-- Optical Particle Accelerator Canvas -->
+            <div class="beam-canvas-container">
+              <canvas id="opticalBeamCanvas"></canvas>
+            </div>
 
-      <div style="margin-top: 1.25rem; display: flex; justify-content: flex-end;">
-        <button class="btn-cyber-encrypt" id="closeModalBtn"
-          style="display: none; padding: 0.5rem 1.2rem; font-size: 0.8rem;" onclick="closeTransmissionModal()">
-          CONFIRM & CLOSE
-        </button>
+            <!-- Target Collision Impact Flare -->
+            <div class="target-collision-flare" id="targetCollisionFlare"></div>
+          </div>
+
+          <!-- Right Photodiode Receiver Node -->
+          <div class="hardware-station receiver-rx">
+            <div class="station-housing">
+              <div class="station-badge">RX // ESP32</div>
+              <div class="detector-lens">
+                <div class="reticle-crosshair"></div>
+                <div class="detector-pulse-core"></div>
+              </div>
+              <div class="station-spec">PHOTODIODE LOCK</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LAYER 3: Floating HUD Targeting Glass (translateZ: 40px) -->
+        <div class="chamber-layer-hud-glass">
+          <!-- Chamber Header Bar -->
+          <div class="chamber-header-bar">
+            <div class="chamber-title-group">
+              <span class="pulse-beacon-cyan"></span>
+              <div class="chamber-title">
+                <span class="brand-title-accent">CYBER-TRANSMITTER MK-IV</span> // OPTICAL BEAM ACCELERATOR
+              </div>
+            </div>
+            <div class="chamber-header-meta">
+              <span class="badge-tag badge-cyan" id="transmissionCipherBadge">AES-256-GCM [SEED-LOCKED]</span>
+              <button type="button" class="chamber-close-x" onclick="closeTransmissionModal()" title="Close Chamber">✕</button>
+            </div>
+          </div>
+
+          <!-- Real-Time Decryption / Packet Scramble Ticker -->
+          <div class="hud-telemetry-row">
+            <div class="hud-packet-scrambler">
+              <span class="hud-label">PHOTON STREAM PAYLOAD:</span>
+              <code class="hud-hex-stream" id="modalHexStream">0x7F4E91BC :: ENCRYPTED_FRAME_01</code>
+            </div>
+            <div class="hud-pills-wrap">
+              <span class="hud-pill"><span class="dot-green"></span>FLUX: <strong>18.4 mW</strong></span>
+              <span class="hud-pill"><span class="dot-cyan"></span>JITTER: <strong>0.00 μrad</strong></span>
+              <span class="hud-pill"><span class="dot-violet"></span>λ: <strong>850.4 nm</strong></span>
+            </div>
+          </div>
+
+          <!-- Segmented 3D LED Power Charge Cells Bar (translateZ: 50px) -->
+          <div class="segmented-charge-container">
+            <div class="charge-cells-grid" id="chargeCellsGrid">
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+              <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            </div>
+          </div>
+
+          <!-- Progress Bar & Status Readout -->
+          <div class="chamber-status-footer">
+            <div class="progress-meta">
+              <span class="status-indicator-label" id="transmissionProgressLabel">Engaging 850nm Photonic Laser Diode...</span>
+              <span class="status-pct-val" id="transmissionProgressPct">0%</span>
+            </div>
+            <div class="progress-bar-wrap">
+              <div class="progress-bar-fill" id="transmissionProgressBar"></div>
+            </div>
+          </div>
+
+          <!-- Disengage / Confirm Action Button -->
+          <div class="chamber-action-row">
+            <div class="interactive-hint">
+              <i data-lucide="scan"></i>
+              <span>INTERACTIVE 3D CHAMBER: MOVE CURSOR TO INSPECT ACCELERATOR</span>
+            </div>
+            <button type="button" class="btn-cyber-confirm" id="closeModalBtn" onclick="closeTransmissionModal()">
+              <i data-lucide="check-check"></i>
+              <span>CONFIRM & DISENGAGE POD</span>
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
